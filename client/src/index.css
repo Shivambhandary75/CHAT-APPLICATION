@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-crazy-pink: #F5D2D2;
+  --color-crazy-yellow: #F8F7BA;
+  --color-crazy-green: #BDE3C3;
+  --color-crazy-blue: #A3CCDA;
+  --font-display: "Courier New", Courier, monospace;
+}
+
+body {
+  background-color: var(--color-crazy-yellow);
+  overflow: hidden;
+}
+
+/* Custom scrollbar to match the vibe */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-crazy-pink); 
+  border-left: 3px solid black;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-crazy-blue); 
+  border: 3px solid black;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-crazy-green); 
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+.wiggle-hover:hover {
+  animation: wiggle 0.3s ease-in-out infinite;
+}
