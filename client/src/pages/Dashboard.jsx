@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LogOut, User, Camera, Edit2, Save, MessageCircle, Users, UserPlus, FolderPlus } from "lucide-react";
+import { LogOut, User, Camera, Edit2, Save, MessageCircle, Users, UserPlus, FolderPlus, Inbox } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ChatSection from "../components/ChatSection";
 import ChatList from "../components/ChatList";
@@ -8,6 +8,8 @@ import Groups from "../components/Groups";
 import Profile from "../components/Profile";
 import AddFriendForm from "../components/AddFriendForm";
 import CreateGroupForm from "../components/CreateGroupForm";
+import GroupSettings from "../components/GroupSettings";
+import Requests from "../components/Requests";
 import CustomAlert from "../components/CustomAlert";
 
 const CONTACTS = [
@@ -21,6 +23,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState("chatList"); // chatList, chat, friends, groups, profile, addFriend, createGroup
   const [activeContact, setActiveContact] = useState(CONTACTS[0]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [showGroupSettings, setShowGroupSettings] = useState(false);
   const [profileData, setProfileData] = useState({
     name: "YOUR NAME",
     username: "username",
@@ -51,6 +55,26 @@ const Dashboard = () => {
 
   const handleMenuClick = (view) => {
     setActiveView(view);
+  };
+
+  const handleGroupSettings = (group) => {
+    setSelectedGroup(group);
+    setShowGroupSettings(true);
+  };
+
+  const handleBackToChat = () => {
+    setActiveView("chatList");
+  };
+
+  const handleSaveGroup = (updatedGroup) => {
+    // In a real app, this would update the backend
+    console.log("Group updated:", updatedGroup);
+    setShowGroupSettings(false);
+  };
+
+  const handleCloseGroupSettings = () => {
+    setShowGroupSettings(false);
+    setSelectedGroup(null);
   };
 
   return (
@@ -84,6 +108,16 @@ const Dashboard = () => {
           >
             <Users size={20} />
             FRIENDS
+          </button>
+
+          <button
+            onClick={() => handleMenuClick("requests")}
+            className={`w-full ${
+              activeView === "requests" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+          >
+            <Inbox size={20} />
+            REQUESTS
           </button>
 
           <button
@@ -144,14 +178,24 @@ const Dashboard = () => {
         {/* Content */}
         <div className="flex-1 overflow-hidden">
           {activeView === "chatList" && <ChatList onSelectChat={handleSelectContact} />}
-          {activeView === "chat" && <ChatSection activeContact={activeContact} />}
+          {activeView === "chat" && <ChatSection activeContact={activeContact} onBack={handleBackToChat} />}
           {activeView === "friends" && <Friends onSelectFriend={handleSelectContact} showAddSection={false} />}
-          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} showCreateSection={false} />}
+          {activeView === "requests" && <Requests />}
+          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} showCreateSection={false} onGroupSettings={handleGroupSettings} />}
           {activeView === "profile" && <Profile profileData={profileData} onSave={handleSaveProfile} />}
           {activeView === "addFriend" && <AddFriendForm />}
           {activeView === "createGroup" && <CreateGroupForm />}
         </div>
       </div>
+
+      {/* Group Settings Modal */}
+      {showGroupSettings && selectedGroup && (
+        <GroupSettings 
+          group={selectedGroup} 
+          onSave={handleSaveGroup} 
+          onClose={handleCloseGroupSettings} 
+        />
+      )}
 
       {/* Custom Alert */}
       <CustomAlert

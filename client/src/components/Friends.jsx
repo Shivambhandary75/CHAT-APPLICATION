@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UserPlus, MessageCircle, UserMinus } from "lucide-react";
+import { UserPlus, MessageCircle, UserMinus, Search } from "lucide-react";
 import CustomAlert from "./CustomAlert";
 
 const FRIENDS_DATA = [
@@ -15,12 +15,18 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
   const [friends, setFriends] = useState(FRIENDS_DATA);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [newFriendUsername, setNewFriendUsername] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [alertState, setAlertState] = useState({
     isOpen: false,
     message: "",
     type: "alert",
     onConfirm: null,
   });
+
+  const filteredFriends = friends.filter(friend =>
+    friend.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleAddFriend = () => {
     if (newFriendUsername.trim()) {
@@ -91,9 +97,24 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
         </div>
       )}
 
+      {/* Search Bar */}
+      <div className="p-4 border-b-4 border-black bg-[var(--color-crazy-blue)]">
+        <div className="relative flex items-center">
+          <Search className="absolute left-3 pointer-events-none" size={20} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search friends..."
+            className="w-full border-4 border-black pl-12 pr-4 py-3 font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
+            style={{ fontFamily: "var(--font-display)" }}
+          />
+        </div>
+      </div>
+
       {/* Friends List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {friends.map((friend) => (
+        {filteredFriends.map((friend) => (
           <div
             key={friend.id}
             className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all"
@@ -133,17 +154,32 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
             </div>
           </div>
         ))}
+        {filteredFriends.length === 0 && (
+          <div className="bg-white border-4 border-black p-8 text-center">
+            <p className="font-black text-lg uppercase">NO FRIENDS FOUND</p>
+            <p className="font-bold text-sm mt-2">Try a different search term</p>
+          </div>
+        )}
       </div>
 
       {/* Stats Footer */}
       <div className="bg-[var(--color-crazy-pink)] border-t-4 border-black p-4 text-center">
         <p className="font-black uppercase">
-          TOTAL FRIENDS: {friends.length}
+          {searchQuery ? `SHOWING: ${filteredFriends.length} / ${friends.length}` : `TOTAL FRIENDS: ${friends.length}`}
         </p>
         <p className="font-bold text-sm mt-1">
-          {friends.filter((f) => f.status === "online").length} ONLINE
+          {filteredFriends.filter((f) => f.status === "online").length} ONLINE
         </p>
       </div>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        isOpen={alertState.isOpen}
+        onClose={() => setAlertState({ isOpen: false, message: "", type: "alert", onConfirm: null })}
+        message={alertState.message}
+        type={alertState.type}
+        onConfirm={alertState.onConfirm}
+      />
     </div>
   );
 };
