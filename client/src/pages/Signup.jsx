@@ -40,9 +40,9 @@ const Signup = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-[var(--color-crazy-blue)] grid grid-cols-1 lg:grid-cols-[3fr_2fr]">
+    <div className="h-screen overflow-hidden grid grid-cols-1 lg:grid-cols-[3fr_2fr]">
       {/* Left Side - Signup Form */}
-      <div className="flex items-center justify-center p-4 lg:p-8 overflow-y-auto">
+      <div className="flex items-center justify-center p-4 lg:p-8 bg-[var(--color-crazy-yellow)]">
         <div className="max-w-md w-full my-auto">
           <div className="bg-[var(--color-crazy-yellow)] border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] p-5">
 
@@ -54,8 +54,7 @@ const Signup = () => {
             >
               YappHere
             </h1>
-            <div className="h-1 bg-black w-20 mx-auto my-2"></div>
-            <h2 className="text-xl font-black uppercase">Register</h2>
+            <h2 className="text-xl font-black uppercase mt-2">Register</h2>
           </div>
 
           {/* Form */}

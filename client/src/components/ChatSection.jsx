@@ -1,16 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, MoreVertical, Trash2 } from "lucide-react";
+import { Send, Paperclip, MoreVertical, Trash2, ArrowLeft, Smile, File, Image as ImageIcon, FileText, Video as VideoIcon, Download } from "lucide-react";
 
-const ChatSection = ({ activeContact }) => {
+const EMOJIS = ["😀", "😂", "😍", "😎", "🤔", "👍", "👎", "❤️", "🔥", "✨", "🎉", "💯", "😊", "😢", "😡", "🤩", "😜", "🙏", "💪", "👏"];
+
+const ChatSection = ({ activeContact, onBack }) => {
   const [messages, setMessages] = useState([
-    { id: "1", text: "WELCOME TO YAPPHERE!", sender: "them", timestamp: new Date(Date.now() - 100000) },
-    { id: "2", text: "This UI is hurting my eyes in the best way possible.", sender: "me", timestamp: new Date(Date.now() - 80000) },
-    { id: "3", text: "No emojis allowed! Only PURE TEXT ENERGY!", sender: "them", timestamp: new Date(Date.now() - 60000) },
+    { id: "1", type: "text", text: "WELCOME TO YAPPHERE!", sender: "them", timestamp: new Date(Date.now() - 100000) },
+    { id: "2", type: "text", text: "This UI is hurting my eyes in the best way possible.", sender: "me", timestamp: new Date(Date.now() - 80000) },
+    { id: "3", type: "text", text: "No emojis allowed! Only PURE TEXT ENERGY!", sender: "them", timestamp: new Date(Date.now() - 60000) },
   ]);
   const [inputValue, setInputValue] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
   const menuRef = useRef(null);
+  const emojiRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,6 +30,9 @@ const ChatSection = ({ activeContact }) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowMenu(false);
       }
+      if (emojiRef.current && !emojiRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -35,6 +43,7 @@ const ChatSection = ({ activeContact }) => {
     if (inputValue.trim()) {
       const newMessage = {
         id: Date.now().toString(),
+        type: "text",
         text: inputValue,
         sender: "me",
         timestamp: new Date(),
@@ -48,6 +57,89 @@ const ChatSection = ({ activeContact }) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleEmojiSelect = (emoji) => {
+    setInputValue(inputValue + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const handleAttachment = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      
+      // Check file type
+      if (file.type.startsWith('image/')) {
+        // Images
+        reader.onloadend = () => {
+          const newMessage = {
+            id: Date.now().toString(),
+            type: "image",
+            fileData: reader.result,
+            fileName: file.name,
+            fileSize: file.size,
+            sender: "me",
+            timestamp: new Date(),
+          };
+          setMessages([...messages, newMessage]);
+        };
+        reader.readAsDataURL(file);
+      } else if (file.type.startsWith('video/')) {
+        // Videos
+        reader.onloadend = () => {
+          const newMessage = {
+            id: Date.now().toString(),
+            type: "video",
+            fileData: reader.result,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            sender: "me",
+            timestamp: new Date(),
+          };
+          setMessages([...messages, newMessage]);
+        };
+        reader.readAsDataURL(file);
+      } else if (file.type === 'application/pdf') {
+        // PDFs
+        reader.onloadend = () => {
+          const newMessage = {
+            id: Date.now().toString(),
+            type: "pdf",
+            fileData: reader.result,
+            fileName: file.name,
+            fileSize: file.size,
+            sender: "me",
+            timestamp: new Date(),
+          };
+          setMessages([...messages, newMessage]);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Other documents (Word, Excel, text, etc.)
+        reader.onloadend = () => {
+          const newMessage = {
+            id: Date.now().toString(),
+            type: "document",
+            fileData: reader.result,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            sender: "me",
+            timestamp: new Date(),
+          };
+          setMessages([...messages, newMessage]);
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      e.target.value = ""; // Reset file input
     }
   };
 
@@ -68,6 +160,14 @@ const ChatSection = ({ activeContact }) => {
       {/* Chat Header */}
       <div className="bg-[var(--color-crazy-green)] border-b-4 border-black p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="bg-white border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
           <div className={`w-12 h-12 ${activeContact?.avatarColor || "bg-[var(--color-crazy-blue)]"} border-4 border-black rounded-full flex items-center justify-center font-black text-sm`}>
             {activeContact?.name ? activeContact.name.substring(0, 2).toUpperCase() : "GL"}
           </div>
@@ -109,17 +209,94 @@ const ChatSection = ({ activeContact }) => {
                 className={`${
                   msg.sender === "me"
                     ? "bg-[var(--color-crazy-blue)]"
-                    : "bg-[var(--color-crazy-pink)]"
-                } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
+                    : "bg-white"
+                } border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
               >
-                <div className="mb-1">
-                  <span className="font-bold text-xs uppercase">
-                    {msg.sender === "me" ? "YOU" : activeContact?.name?.toUpperCase() || "GLITCHY GAB"}
-                  </span>
+                {/* Text Message */}
+                {msg.type === "text" && (
+                  <p className="font-bold text-base break-words">{msg.text}</p>
+                )}
+                
+                {/* Image Message */}
+                {msg.type === "image" && (
+                  <div>
+                    <img 
+                      src={msg.fileData} 
+                      alt={msg.fileName}
+                      className="max-w-full border-2 border-black mb-2"
+                      style={{ maxHeight: "300px" }}
+                    />
+                    <p className="font-bold text-xs opacity-70">{msg.fileName}</p>
+                  </div>
+                )}
+                
+                {/* Video Message */}
+                {msg.type === "video" && (
+                  <div>
+                    <video 
+                      src={msg.fileData}
+                      controls
+                      className="max-w-full border-2 border-black mb-2"
+                      style={{ maxHeight: "300px" }}
+                    />
+                    <p className="font-bold text-xs opacity-70">{msg.fileName}</p>
+                  </div>
+                )}
+                
+                {/* PDF Message */}
+                {msg.type === "pdf" && (
+                  <div>
+                    <div className="bg-[var(--color-crazy-yellow)] border-2 border-black p-4 mb-2">
+                      <div className="flex items-center gap-3 mb-2">
+                        <FileText size={32} className="font-black" />
+                        <div className="flex-1">
+                          <p className="font-bold text-sm">{msg.fileName}</p>
+                          <p className="font-bold text-xs opacity-70">
+                            {(msg.fileSize / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <a 
+                        href={msg.fileData}
+                        download={msg.fileName}
+                        className="bg-black text-white border-2 border-black px-4 py-2 font-bold uppercase text-sm inline-flex items-center gap-2 hover:bg-[var(--color-crazy-pink)] hover:text-black transition-all"
+                      >
+                        <Download size={16} />
+                        DOWNLOAD PDF
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Document Message */}
+                {msg.type === "document" && (
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white border-2 border-black p-2">
+                      <FileText size={24} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm">{msg.fileName}</p>
+                      <p className="font-bold text-xs opacity-70">
+                        {(msg.fileSize / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                    <a 
+                      href={msg.fileData}
+                      download={msg.fileName}
+                      className="bg-black text-white border-2 border-black p-2 hover:bg-[var(--color-crazy-green)] transition-all"
+                    >
+                      <Download size={16} />
+                    </a>
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-end gap-2 mt-2">
+                  <span className="text-xs font-bold opacity-70">{formatTime(msg.timestamp)}</span>
+                  {msg.sender === "me" && (
+                    <span className="text-xs font-black">✓✓</span>
+                  )}
                 </div>
-                <p className="font-bold text-base break-words">{msg.text}</p>
               </div>
-              <p className="text-xs font-bold mt-1 px-1">{formatTime(msg.timestamp)}</p>
             </div>
           </div>
         ))}
@@ -134,13 +311,10 @@ const ChatSection = ({ activeContact }) => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type something wild..."
+            placeholder="Type something ..."
             className="flex-1 border-4 border-black px-4 py-3 font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
             style={{ fontFamily: "var(--font-display)" }}
           />
-          <button className="bg-black text-white border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]">
-            <Paperclip size={24} />
-          </button>
           <button
             onClick={handleSend}
             className="bg-black text-white border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
@@ -148,13 +322,48 @@ const ChatSection = ({ activeContact }) => {
             <Send size={24} />
           </button>
         </div>
-        <div className="flex gap-3 mt-3">
-          <button className="bg-white border-3 border-black p-2 px-3 font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]">
-              <Paperclip size={18} className="inline mr-1" />
+        
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          className="hidden"
+          accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+        />
+
+        <div className="flex gap-3 mt-3 relative">
+          <button 
+            onClick={handleAttachment}
+            className="bg-white border-3 border-black p-2 px-3 font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+          >
+            <Paperclip size={18} className="inline mr-1" />
+          </button>
+          <div className="relative" ref={emojiRef}>
+            <button 
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="bg-white border-3 border-black p-2 px-3 font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+            >
+              <Smile size={18} className="inline" />
             </button>
-          <button className="bg-white border-3 border-black p-2 px-3 font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]">
-              #
-            </button>
+            
+            {/* Emoji Picker */}
+            {showEmojiPicker && (
+              <div className="absolute bottom-full left-0 mb-2 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 z-10 w-64">
+                <div className="grid grid-cols-5 gap-2">
+                  {EMOJIS.map((emoji, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleEmojiSelect(emoji)}
+                      className="text-2xl hover:bg-[var(--color-crazy-yellow)] border-2 border-black p-2 transition-all hover:scale-110 active:scale-95"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

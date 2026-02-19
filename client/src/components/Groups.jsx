@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Users, MessageCircle, UserPlus, LogOut, Settings } from "lucide-react";
+import { Users, MessageCircle, UserPlus, LogOut, Settings, Search } from "lucide-react";
 import CustomAlert from "./CustomAlert";
 
 const GROUPS_DATA = [
@@ -45,15 +45,21 @@ const GROUPS_DATA = [
   },
 ];
 
-const Groups = ({ onSelectGroup, showCreateSection = true }) => {
+const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) => {
   const [groups, setGroups] = useState(GROUPS_DATA);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [confirmState, setConfirmState] = useState({
     isOpen: false,
     message: "",
     onConfirm: null,
   });
+
+  const filteredGroups = groups.filter(group =>
+    group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    group.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleCreateGroup = () => {
     if (newGroupName.trim()) {
@@ -126,9 +132,24 @@ const Groups = ({ onSelectGroup, showCreateSection = true }) => {
         </div>
       )}
 
+      {/* Search Bar */}
+      <div className="p-4 border-b-4 border-black bg-[var(--color-crazy-green)]">
+        <div className="relative flex items-center">
+          <Search className="absolute left-3 pointer-events-none" size={20} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search groups..."
+            className="w-full border-4 border-black pl-12 pr-4 py-3 font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
+            style={{ fontFamily: "var(--font-display)" }}
+          />
+        </div>
+      </div>
+
       {/* Groups List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {groups.map((group) => (
+        {filteredGroups.map((group) => (
           <div
             key={group.id}
             className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all"
@@ -164,6 +185,7 @@ const Groups = ({ onSelectGroup, showCreateSection = true }) => {
                   <MessageCircle size={18} />
                 </button>
                 <button
+                  onClick={() => onGroupSettings && onGroupSettings(group)}
                   className="bg-[var(--color-crazy-yellow)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
                 >
                   <Settings size={18} />
@@ -178,15 +200,21 @@ const Groups = ({ onSelectGroup, showCreateSection = true }) => {
             </div>
           </div>
         ))}
+        {filteredGroups.length === 0 && (
+          <div className="bg-white border-4 border-black p-8 text-center">
+            <p className="font-black text-lg uppercase">NO GROUPS FOUND</p>
+            <p className="font-bold text-sm mt-2">Try a different search term</p>
+          </div>
+        )}
       </div>
 
       {/* Stats Footer */}
       <div className="bg-[var(--color-crazy-yellow)] border-t-4 border-black p-4 text-center">
         <p className="font-black uppercase">
-          TOTAL GROUPS: {groups.length}
+          {searchQuery ? `SHOWING: ${filteredGroups.length} / ${groups.length}` : `TOTAL GROUPS: ${groups.length}`}
         </p>
         <p className="font-bold text-sm mt-1">
-          {groups.reduce((sum, g) => sum + g.unread, 0)} UNREAD MESSAGES
+          {filteredGroups.reduce((sum, g) => sum + g.unread, 0)} UNREAD MESSAGES
         </p>
       </div>
 
