@@ -1,9 +1,13 @@
 import React, { useState } from "react";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { LogOut, User, Camera, Edit2, Save, MessageCircle, Users, UserPlus, FolderPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ChatSection from "../components/ChatSection";
+import ChatList from "../components/ChatList";
 import Friends from "../components/Friends";
 import Groups from "../components/Groups";
+import Profile from "../components/Profile";
+import AddFriendForm from "../components/AddFriendForm";
+import CreateGroupForm from "../components/CreateGroupForm";
 import CustomAlert from "../components/CustomAlert";
 
 const CONTACTS = [
@@ -15,9 +19,13 @@ const CONTACTS = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeView, setActiveView] = useState("chat"); // chat, friends, groups
+  const [activeView, setActiveView] = useState("chatList"); // chatList, chat, friends, groups, profile, addFriend, createGroup
   const [activeContact, setActiveContact] = useState(CONTACTS[0]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: "YOUR NAME",
+    username: "username",
+    photo: null,
+  });
   const [confirmState, setConfirmState] = useState({
     isOpen: false,
     message: "",
@@ -27,7 +35,7 @@ const Dashboard = () => {
   const handleLogout = () => {
     setConfirmState({
       isOpen: true,
-      message: "LEAVE THE CHAOS ZONE?",
+      message: "DO U WANT TO LOGOUT?",
       onConfirm: () => navigate("/"),
     });
   };
@@ -37,110 +45,93 @@ const Dashboard = () => {
     setActiveView("chat");
   };
 
+  const handleSaveProfile = (newProfileData) => {
+    setProfileData(newProfileData);
+  };
+
+  const handleMenuClick = (view) => {
+    setActiveView(view);
+  };
+
   return (
     <div className="h-screen flex overflow-hidden bg-[var(--color-crazy-yellow)]">
-      {/* Sidebar - Contact List */}
-      <div
-        className={`${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed md:relative w-80 h-full bg-[var(--color-crazy-pink)] border-r-4 border-black transition-transform duration-300 z-20 flex flex-col`}
-      >
+      {/* Sidebar - Menu */}
+      <div className="w-80 h-full bg-[var(--color-crazy-pink)] border-r-4 border-black flex flex-col">
         {/* Sidebar Header */}
         <div className="bg-[var(--color-crazy-pink)] border-b-4 border-black p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-black italic" style={{ fontFamily: "var(--font-display)" }}>
-              YappHere
-            </h1>
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="md:hidden bg-black text-white border-3 border-black p-2"
-            >
-              <X size={20} />
-            </button>
-          </div>
-          {/* User Profile */}
-          <div className="bg-[var(--color-crazy-blue)] border-3 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-black text-white border-3 border-black rounded-full flex items-center justify-center font-black">
-                <User size={20} />
-              </div>
-              <div className="flex-1">
-                <p className="font-black uppercase">YOUR NAME</p>
-                <p className="font-bold text-xs">@username</p>
-              </div>
-            </div>
-          </div>
+          <h1 className="text-3xl font-black italic text-center" style={{ fontFamily: "'Betania Patmos In', cursive" }}>
+            YappHere
+          </h1>
         </div>
 
-        {/* View Tabs */}
-        <div className="border-b-4 border-black bg-[var(--color-crazy-pink)] flex">
+        {/* Menu Items */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
           <button
-            onClick={() => setActiveView("chat")}
-            className={`flex-1 font-black uppercase py-3 border-r-2 border-black ${
-              activeView === "chat" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-pink)]"
-            } hover:bg-[var(--color-crazy-yellow)] transition-colors`}
+            onClick={() => handleMenuClick("chatList")}
+            className={`w-full ${
+              activeView === "chatList" || activeView === "chat" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
+            <MessageCircle size={20} />
             CHATS
           </button>
+
           <button
-            onClick={() => setActiveView("friends")}
-            className={`flex-1 font-black uppercase py-3 border-r-2 border-black ${
-              activeView === "friends" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-pink)]"
-            } hover:bg-[var(--color-crazy-yellow)] transition-colors`}
+            onClick={() => handleMenuClick("friends")}
+            className={`w-full ${
+              activeView === "friends" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
+            <Users size={20} />
             FRIENDS
           </button>
+
           <button
-            onClick={() => setActiveView("groups")}
-            className={`flex-1 font-black uppercase py-3 ${
-              activeView === "groups" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-pink)]"
-            } hover:bg-[var(--color-crazy-yellow)] transition-colors`}
+            onClick={() => handleMenuClick("groups")}
+            className={`w-full ${
+              activeView === "groups" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
+            <FolderPlus size={20} />
             GROUPS
           </button>
-        </div>
 
-        {/* Contact List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
-          {CONTACTS.map((contact) => (
-            <button
-              key={contact.id}
-              onClick={() => handleSelectContact(contact)}
-              className={`w-full ${
-                activeContact.id === contact.id ? "bg-[var(--color-crazy-blue)]" : "bg-white"
-              } border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className={`w-10 h-10 ${contact.avatarColor} border-3 border-black rounded-full flex items-center justify-center font-black text-xs`}>
-                    {contact.name.substring(0, 2).toUpperCase()}
-                  </div>
-                  {contact.status === "online" && (
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[var(--color-crazy-green)] border-2 border-black rounded-full"></div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black">{contact.name}</h3>
-                  <p className="font-bold text-xs uppercase">
-                    {contact.status === "online" ? "ONLINE NOW!" : "LAST SEEN RECENTLY"}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Add Friend Button */}
-        <div className="p-3 border-t-4 border-black bg-[var(--color-crazy-pink)]">
           <button
-            onClick={() => setActiveView("friends")}
-            className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-4 py-3 uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+            onClick={() => handleMenuClick("profile")}
+            className={`w-full ${
+              activeView === "profile" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
-            ADD FRIEND +
+            <User size={20} />
+            PROFILE
           </button>
+
+          <button
+            onClick={() => handleMenuClick("addFriend")}
+            className={`w-full ${
+              activeView === "addFriend" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-green)]"
+            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+          >
+            <UserPlus size={20} />
+            ADD FRIEND
+          </button>
+
+          <button
+            onClick={() => handleMenuClick("createGroup")}
+            className={`w-full ${
+              activeView === "createGroup" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-blue)]"
+            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+          >
+            <FolderPlus size={20} />
+            CREATE GROUP
+          </button>
+        </div>
+
+        {/* Logout Button */}
+        <div className="p-4 border-t-4 border-black bg-[var(--color-crazy-pink)]">
           <button
             onClick={handleLogout}
-            className="w-full mt-2 bg-black text-white border-4 border-black font-black px-4 py-2 uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
+            className="w-full bg-black text-white border-4 border-black font-black px-4 py-3 uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
           >
             <LogOut size={18} />
             LOGOUT
@@ -150,31 +141,17 @@ const Dashboard = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full">
-        {/* Mobile Menu Button */}
-        <div className="md:hidden bg-[var(--color-crazy-green)] border-b-4 border-black p-3">
-          <button
-            onClick={() => setIsSidebarOpen(true)}
-            className="bg-black text-white border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-          >
-            <Menu size={20} />
-          </button>
-        </div>
-
         {/* Content */}
         <div className="flex-1 overflow-hidden">
+          {activeView === "chatList" && <ChatList onSelectChat={handleSelectContact} />}
           {activeView === "chat" && <ChatSection activeContact={activeContact} />}
-          {activeView === "friends" && <Friends onSelectFriend={handleSelectContact} />}
-          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} />}
+          {activeView === "friends" && <Friends onSelectFriend={handleSelectContact} showAddSection={false} />}
+          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} showCreateSection={false} />}
+          {activeView === "profile" && <Profile profileData={profileData} onSave={handleSaveProfile} />}
+          {activeView === "addFriend" && <AddFriendForm />}
+          {activeView === "createGroup" && <CreateGroupForm />}
         </div>
       </div>
-
-      {/* Overlay for mobile sidebar */}
-      {isSidebarOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-10"
-          onClick={() => setIsSidebarOpen(false)}
-        ></div>
-      )}
 
       {/* Custom Alert */}
       <CustomAlert

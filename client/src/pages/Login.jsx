@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import loginImage from "../assets/images/login_image.jpg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,13 +24,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-crazy-green)] flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Login Container */}
-        <div className="bg-[var(--color-crazy-pink)] border-[6px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6">
+    <div className="h-screen overflow-hidden bg-[var(--color-crazy-green)] grid grid-cols-1 lg:grid-cols-[3fr_2fr]">
+      {/* Left Side - Login Form */}
+      <div className="flex items-center justify-center p-4 lg:p-8">
+        <div className="max-w-md w-full">
+          {/* Login Container */}
+          <div className="bg-[var(--color-crazy-pink)] border-[6px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6">
           {/* Header */}
           <div className="text-center mb-5">
-            <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight" style={{ fontFamily: "'Betania Patmos In', cursive" }}>
               YappHere
             </h1>
             <div className="h-1 bg-black w-20 mx-auto mb-3"></div>
@@ -79,7 +82,7 @@ const Login = () => {
               type="submit"
               className="w-full bg-[var(--color-crazy-blue)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px]"
             >
-              ENTER THE ZONE
+              LOGIN
             </button>
           </form>
 
@@ -113,6 +116,23 @@ const Login = () => {
             </button>
           </div>
         </div>
+      </div>
+      </div>
+
+      {/* Right Side - Image */}
+      <div className="hidden lg:block relative overflow-hidden">
+        <img
+          src={loginImage}
+          alt="Login Visual"
+          className="w-full h-full object-cover"
+        />
+        {/* Gradient Overlay */}
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{
+            background: 'linear-gradient(135deg, #BDE3C3 0%, #A3CCDA 50%, #BDE3C3 100%)'
+          }}
+        ></div>
       </div>
     </div>
   );
