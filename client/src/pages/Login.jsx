@@ -96,7 +96,7 @@ const Login = () => {
           {/* Sign Up Link */}
           <div className="text-center">
             <p className="font-bold mb-2 uppercase text-xs">
-              NEW TO THE CHAOS?
+              NEW USER?
             </p>
             <button
               onClick={() => navigate("/signup")}
