@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAlert from "../components/CustomAlert";
+import signupImage from "../assets/images/signup_image.jpg";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Signup = () => {
     password: "",
     confirmPassword: "",
   });
+
   const [alertState, setAlertState] = useState({
     isOpen: false,
     message: "",
@@ -17,7 +19,7 @@ const Signup = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle signup logic here
+
     if (formData.password !== formData.confirmPassword) {
       setAlertState({
         isOpen: true,
@@ -25,6 +27,7 @@ const Signup = () => {
       });
       return;
     }
+
     console.log("Signup:", formData);
     navigate("/dashboard");
   };
@@ -37,133 +40,148 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-crazy-blue)] flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Signup Container */}
-        <div className="bg-[var(--color-crazy-yellow)] border-[6px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6">
+    <div className="h-screen overflow-hidden bg-[var(--color-crazy-blue)] grid grid-cols-1 lg:grid-cols-[3fr_2fr]">
+      {/* Left Side - Signup Form */}
+      <div className="flex items-center justify-center p-4 lg:p-8 overflow-y-auto">
+        <div className="max-w-md w-full my-auto">
+          <div className="bg-[var(--color-crazy-yellow)] border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] p-5">
+
           {/* Header */}
-          <div className="text-center mb-5">
-            <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+          <div className="text-center mb-4">
+            <h1
+              className="text-4xl font-black tracking-tight"
+              style={{ fontFamily: "'Betania Patmos In', cursive" }}
+            >
               YappHere
             </h1>
-            <div className="h-1 bg-black w-20 mx-auto mb-3"></div>
-            {/* <h2 className="text-xl md:text-2xl font-black uppercase">
-              JOIN THE CHAOS
-            </h2> */}
+            <div className="h-1 bg-black w-20 mx-auto my-2"></div>
+            <h2 className="text-xl font-black uppercase">Register</h2>
           </div>
 
-          {/* Signup Form */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Username Field */}
+
+            {/* Username */}
             <div>
               <label className="block font-black text-sm mb-1 uppercase">
-                USERNAME
+                Username
               </label>
               <input
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                placeholder="Choose a username..."
                 required
+                placeholder="Choose username..."
+                className="w-full border-3 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
                 style={{ fontFamily: "var(--font-display)" }}
               />
             </div>
 
-            {/* Email Field */}
+            {/* Email */}
             <div>
               <label className="block font-black text-sm mb-1 uppercase">
-                EMAIL
+                Email
               </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                placeholder="Enter your email..."
                 required
+                placeholder="Enter email..."
+                className="w-full border-3 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
                 style={{ fontFamily: "var(--font-display)" }}
               />
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
               <label className="block font-black text-sm mb-1 uppercase">
-                PASSWORD
+                Password
               </label>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                placeholder="Create a password..."
                 required
+                placeholder="Create password..."
+                className="w-full border-3 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
                 style={{ fontFamily: "var(--font-display)" }}
               />
             </div>
 
-            {/* Confirm Password Field */}
+            {/* Confirm Password */}
             <div>
               <label className="block font-black text-sm mb-1 uppercase">
-                CONFIRM PASSWORD
+                Confirm Password
               </label>
               <input
                 type="password"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                placeholder="Confirm password..."
                 required
+                placeholder="Confirm password..."
+                className="w-full border-3 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
                 style={{ fontFamily: "var(--font-display)" }}
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+              className="w-full bg-[var(--color-crazy-green)] border-3 border-black font-black px-5 py-2.5 text-base uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              CREATE ACCOUNT
+              Create Account
             </button>
           </form>
 
           {/* Divider */}
-          <div className="my-4 flex items-center">
+          <div className="my-3 flex items-center">
             <div className="flex-1 h-1 bg-black"></div>
-            <span className="px-3 font-black uppercase text-xs">OR</span>
+            <span className="px-2 font-black uppercase text-xs">OR</span>
             <div className="flex-1 h-1 bg-black"></div>
           </div>
 
-          {/* Login Link */}
-          <div className="text-center">
-            <p className="font-bold mb-2 uppercase text-xs">
-              ALREADY HAVE AN ACCOUNT?
-            </p>
-            <button
-              onClick={() => navigate("/login")}
-              className="w-full bg-[var(--color-crazy-pink)] border-4 border-black font-black px-6 py-2 text-base uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px]"
-            >
-              LOGIN
-            </button>
-          </div>
+          {/* Login */}
+          <button
+            onClick={() => navigate("/login")}
+            className="w-full bg-[var(--color-crazy-pink)] border-3 border-black font-black px-5 py-2.5 text-base uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
+          >
+            Login
+          </button>
 
-          {/* Back to Home */}
-          <div className="mt-4 text-center">
+          {/* Back */}
+          <div className="mt-3 text-center">
             <button
               onClick={() => navigate("/")}
-              className="font-bold uppercase text-xs hover:underline"
+              className="font-bold uppercase text-sm hover:underline"
             >
-              BACK TO HOME
+              Back to Home
             </button>
           </div>
         </div>
       </div>
+      </div>
+      
+      {/* Right Side - Image */}
+      <div className="hidden lg:block relative overflow-hidden">
+        <img
+          src={signupImage}
+          alt="Signup Visual"
+          className="w-full h-full object-cover"
+        />
+        {/* Gradient Overlay */}
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{
+            background: 'linear-gradient(135deg, #A3CCDA 0%, #BDE3C3 30%, #A3CCDA 100%)'
+          }}
+        ></div>
+      </div>
 
-      {/* Custom Alert */}
       <CustomAlert
         isOpen={alertState.isOpen}
         onClose={() => setAlertState({ isOpen: false, message: "" })}

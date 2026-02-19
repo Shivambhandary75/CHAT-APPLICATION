@@ -45,7 +45,7 @@ const GROUPS_DATA = [
   },
 ];
 
-const Groups = ({ onSelectGroup }) => {
+const Groups = ({ onSelectGroup, showCreateSection = true }) => {
   const [groups, setGroups] = useState(GROUPS_DATA);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
@@ -71,11 +71,11 @@ const Groups = ({ onSelectGroup }) => {
     }
   };
 
-  const handleLeaveGroup = (groupId) => {
+  const handleLeaveGroup = (group) => {
     setConfirmState({
       isOpen: true,
-      message: "LEAVE THIS CHAOS ZONE?",
-      onConfirm: () => setGroups(groups.filter((g) => g.id !== groupId)),
+      message: `LEAVE ${group.name}?`,
+      onConfirm: () => setGroups(groups.filter((g) => g.id !== group.id)),
     });
   };
 
@@ -87,42 +87,44 @@ const Groups = ({ onSelectGroup }) => {
       </div>
 
       {/* Create Group Section */}
-      <div className="p-4 border-b-4 border-black bg-[var(--color-crazy-pink)]">
-        {!showCreateGroup ? (
-          <button
-            onClick={() => setShowCreateGroup(true)}
-            className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-4 py-3 uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
-          >
-            <Users size={20} />
-            CREATE GROUP
-          </button>
-        ) : (
-          <div className="space-y-2">
-            <input
-              type="text"
-              value={newGroupName}
-              onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder="Enter group name..."
-              className="w-full border-4 border-black px-3 py-2 font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none"
-              style={{ fontFamily: "var(--font-display)" }}
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleCreateGroup}
-                className="flex-1 bg-[var(--color-crazy-blue)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-              >
-                CREATE
-              </button>
-              <button
-                onClick={() => setShowCreateGroup(false)}
-                className="flex-1 bg-[var(--color-crazy-yellow)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-              >
-                CANCEL
-              </button>
+      {showCreateSection && (
+        <div className="p-4 border-b-4 border-black bg-[var(--color-crazy-pink)]">
+          {!showCreateGroup ? (
+            <button
+              onClick={() => setShowCreateGroup(true)}
+              className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-4 py-3 uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
+            >
+              <Users size={20} />
+              CREATE GROUP
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder="Enter group name..."
+                className="w-full border-4 border-black px-3 py-2 font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none"
+                style={{ fontFamily: "var(--font-display)" }}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCreateGroup}
+                  className="flex-1 bg-[var(--color-crazy-blue)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
+                >
+                  CREATE
+                </button>
+                <button
+                  onClick={() => setShowCreateGroup(false)}
+                  className="flex-1 bg-[var(--color-crazy-yellow)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
+                >
+                  CANCEL
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Groups List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -167,7 +169,7 @@ const Groups = ({ onSelectGroup }) => {
                   <Settings size={18} />
                 </button>
                 <button
-                  onClick={() => handleLeaveGroup(group.id)}
+                  onClick={() => handleLeaveGroup(group)}
                   className="bg-[var(--color-crazy-pink)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
                 >
                   <LogOut size={18} />

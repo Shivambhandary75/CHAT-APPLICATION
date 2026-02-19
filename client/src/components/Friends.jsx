@@ -11,7 +11,7 @@ const FRIENDS_DATA = [
   { id: "6", name: "Digital Dan", username: "digitaldan", avatarColor: "bg-[var(--color-crazy-blue)]", status: "online" },
 ];
 
-const Friends = ({ onSelectFriend }) => {
+const Friends = ({ onSelectFriend, showAddSection = true }) => {
   const [friends, setFriends] = useState(FRIENDS_DATA);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [newFriendUsername, setNewFriendUsername] = useState("");
@@ -35,12 +35,12 @@ const Friends = ({ onSelectFriend }) => {
     }
   };
 
-  const handleRemoveFriend = (friendId) => {
+  const handleRemoveFriend = (friend) => {
     setAlertState({
       isOpen: true,
-      message: "REMOVE THIS FRIEND FROM YOUR CHAOS ZONE?",
+      message: `REMOVE ${friend.name.toUpperCase()} FROM YOUR FRIENDS?`,
       type: "confirm",
-      onConfirm: () => setFriends(friends.filter((f) => f.id !== friendId)),
+      onConfirm: () => setFriends(friends.filter((f) => f.id !== friend.id)),
     });
   };
 
@@ -52,42 +52,44 @@ const Friends = ({ onSelectFriend }) => {
       </div>
 
       {/* Add Friend Section */}
-      <div className="p-4 border-b-4 border-black bg-[var(--color-crazy-green)]">
-        {!showAddFriend ? (
-          <button
-            onClick={() => setShowAddFriend(true)}
-            className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-4 py-3 uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
-          >
-            <UserPlus size={20} />
-            ADD FRIEND
-          </button>
-        ) : (
-          <div className="space-y-2">
-            <input
-              type="text"
-              value={newFriendUsername}
-              onChange={(e) => setNewFriendUsername(e.target.value)}
-              placeholder="Enter username..."
-              className="w-full border-4 border-black px-3 py-2 font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none"
-              style={{ fontFamily: "var(--font-display)" }}
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddFriend}
-                className="flex-1 bg-[var(--color-crazy-blue)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-              >
-                SEND
-              </button>
-              <button
-                onClick={() => setShowAddFriend(false)}
-                className="flex-1 bg-[var(--color-crazy-pink)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-              >
-                CANCEL
-              </button>
+      {showAddSection && (
+        <div className="p-4 border-b-4 border-black bg-[var(--color-crazy-green)]">
+          {!showAddFriend ? (
+            <button
+              onClick={() => setShowAddFriend(true)}
+              className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-4 py-3 uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
+            >
+              <UserPlus size={20} />
+              ADD FRIEND
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={newFriendUsername}
+                onChange={(e) => setNewFriendUsername(e.target.value)}
+                placeholder="Enter username..."
+                className="w-full border-4 border-black px-3 py-2 font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none"
+                style={{ fontFamily: "var(--font-display)" }}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddFriend}
+                  className="flex-1 bg-[var(--color-crazy-blue)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
+                >
+                  SEND
+                </button>
+                <button
+                  onClick={() => setShowAddFriend(false)}
+                  className="flex-1 bg-[var(--color-crazy-pink)] border-3 border-black font-black px-3 py-2 uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
+                >
+                  CANCEL
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Friends List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -122,7 +124,7 @@ const Friends = ({ onSelectFriend }) => {
                   <MessageCircle size={18} />
                 </button>
                 <button
-                  onClick={() => handleRemoveFriend(friend.id)}
+                  onClick={() => handleRemoveFriend(friend)}
                   className="bg-[var(--color-crazy-pink)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
                 >
                   <UserMinus size={18} />
@@ -142,15 +144,6 @@ const Friends = ({ onSelectFriend }) => {
           {friends.filter((f) => f.status === "online").length} ONLINE
         </p>
       </div>
-
-      {/* Custom Alert */}
-      <CustomAlert
-        isOpen={alertState.isOpen}
-        onClose={() => setAlertState({ isOpen: false, message: "", type: "alert", onConfirm: null })}
-        message={alertState.message}
-        type={alertState.type}
-        onConfirm={alertState.onConfirm}
-      />
     </div>
   );
 };

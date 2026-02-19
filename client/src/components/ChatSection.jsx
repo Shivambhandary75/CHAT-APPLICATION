@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, Phone, Video, MoreVertical } from "lucide-react";
+import { Send, Paperclip, MoreVertical, Trash2 } from "lucide-react";
 
 const ChatSection = ({ activeContact }) => {
   const [messages, setMessages] = useState([
-    { id: "1", text: "WELCOME TO THE CHAOS ZONE!", sender: "them", timestamp: new Date(Date.now() - 100000) },
+    { id: "1", text: "WELCOME TO YAPPHERE!", sender: "them", timestamp: new Date(Date.now() - 100000) },
     { id: "2", text: "This UI is hurting my eyes in the best way possible.", sender: "me", timestamp: new Date(Date.now() - 80000) },
     { id: "3", text: "No emojis allowed! Only PURE TEXT ENERGY!", sender: "them", timestamp: new Date(Date.now() - 60000) },
   ]);
   const [inputValue, setInputValue] = useState("");
+  const [showMenu, setShowMenu] = useState(false);
   const messagesEndRef = useRef(null);
+  const menuRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -17,6 +19,17 @@ const ChatSection = ({ activeContact }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSend = () => {
     if (inputValue.trim()) {
@@ -36,6 +49,11 @@ const ChatSection = ({ activeContact }) => {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleClearChat = () => {
+    setMessages([]);
+    setShowMenu(false);
   };
 
   const formatTime = (date) => {
@@ -58,16 +76,24 @@ const ChatSection = ({ activeContact }) => {
             <p className="font-bold text-sm">@{activeContact?.username || "glitchygab"}</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button className="bg-white border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]">
-            <Phone size={20} />
-          </button>
-          <button className="bg-white border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]">
-            <Video size={20} />
-          </button>
-          <button className="bg-white border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]">
+        <div className="relative" ref={menuRef}>
+          <button 
+            onClick={() => setShowMenu(!showMenu)}
+            className="bg-white border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+          >
             <MoreVertical size={20} />
           </button>
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-2 bg-[var(--color-crazy-yellow)] border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] z-10 min-w-[180px]">
+              <button
+                onClick={handleClearChat}
+                className="w-full px-4 py-3 font-black uppercase text-left hover:bg-[var(--color-crazy-pink)] border-b-2 border-black flex items-center gap-2"
+              >
+                <Trash2 size={16} />
+                CLEAR CHAT
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
