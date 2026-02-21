@@ -2,11 +2,12 @@ package utils
 
 import (
 	"time"
+	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("supersecretkey") // move to env later
+var jwtSecret = []byte(os.Getenv("JWT_SECRET")) // move to env later
 
 func GenerateToken(userID string) (string, error) {
 	claims := jwt.MapClaims{

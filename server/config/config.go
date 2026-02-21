@@ -3,14 +3,16 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Port     string
-	MongoURI string
-	DBName   string
+	Port        string
+	MongoURI    string
+	DBName      string
+	CorsOrigins []string
 }
 
 func Load() Config {
@@ -19,9 +21,12 @@ func Load() Config {
 		log.Println("No .env file found")
 	}
 
+	origins := strings.Split(os.Getenv("CORS_ORIGINS"), ",")
+
 	return Config{
-		Port:     os.Getenv("PORT"),
-		MongoURI: os.Getenv("MONGO_URI"),
-		DBName:   os.Getenv("DB_NAME"),
+		Port:        os.Getenv("PORT"),
+		MongoURI:    os.Getenv("MONGO_URI"),
+		DBName:      os.Getenv("DB_NAME"),
+		CorsOrigins: origins,
 	}
 }

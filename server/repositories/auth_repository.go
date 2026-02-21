@@ -18,12 +18,22 @@ func NewAuthRepository(client *mongo.Client, dbName string) *AuthRepository {
 
 	collection := client.Database(dbName).Collection("users")
 
-	indexModel := mongo.IndexModel{
-		Keys: bson.M{"email": 1},
+	// Unique email index
+	emailIndex := mongo.IndexModel{
+		Keys:    bson.M{"email": 1},
 		Options: options.Index().SetUnique(true),
 	}
 
-	_, err := collection.Indexes().CreateOne(context.Background(), indexModel)
+	// Unique username index
+	usernameIndex := mongo.IndexModel{
+		Keys:    bson.M{"username": 1},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err := collection.Indexes().CreateMany(
+		context.Background(),
+		[]mongo.IndexModel{emailIndex, usernameIndex},
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -53,6 +63,28 @@ func (r *AuthRepository) FindByEmail(email string) (*models.User, error) {
 
 	if err == mongo.ErrNoDocuments {
 		return nil, nil // important: no error, just no user
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *AuthRepository) FindByUsername(username string) (*models.User, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var user models.User
+
+	err := r.collection.FindOne(ctx, bson.M{
+		"username": username,
+	}).Decode(&user)
+
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
 	}
 
 	if err != nil {

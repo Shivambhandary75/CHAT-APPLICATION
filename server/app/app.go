@@ -14,7 +14,7 @@ func Start() {
 	client := database.Connect(cfg.MongoURI)
 	defer client.Disconnect(nil)
 
-	r := routes.SetupRouter()
+	r := routes.SetupRouter(cfg.CorsOrigins)
 
 	// Register all feature modules
 	RegisterModules(r, client, cfg.DBName)

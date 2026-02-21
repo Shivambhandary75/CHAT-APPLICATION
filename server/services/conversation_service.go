@@ -2,6 +2,8 @@ package services
 
 import (
 	"time"
+	"fmt"
+	"sort"
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/models"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/repositories"
@@ -15,11 +17,29 @@ func NewConversationService(repo *repositories.ConversationRepository) *Conversa
 	return &ConversationService{repo: repo}
 }
 
+
 func (s *ConversationService) CreateDirectConversation(user1, user2 string) (*models.Conversation, error) {
+
+	if user1 == user2 {
+		return nil, fmt.Errorf("cannot create conversation with yourself")
+	}
+
+	participants := []string{user1, user2}
+	sort.Strings(participants)
+
+	// Check if conversation already exists
+	existing, err := s.repo.FindDirectConversation(participants)
+	if err != nil {
+		return nil, err
+	}
+
+	if existing != nil {
+		return existing, nil
+	}
 
 	conversation := models.Conversation{
 		Type:         "direct",
-		Participants: []string{user1, user2},
+		Participants: participants,
 		CreatedAt:    time.Now(),
 	}
 

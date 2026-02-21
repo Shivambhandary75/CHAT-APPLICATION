@@ -7,9 +7,10 @@ import (
 )
 
 type User struct {
-	ID        bson.ObjectID `bson:"_id,omitempty" json:"id"`
-	Username  string        `bson:"username" json:"username"`
-	Email     string        `bson:"email" json:"email"`
-	Password  string        `bson:"password"`
-	CreatedAt time.Time     `bson:"created_at" json:"created_at"`
+	ID          bson.ObjectID `bson:"_id,omitempty"`
+	Username    string        `bson:"username"`      // unique
+	DisplayName string        `bson:"display_name"`  // not unique
+	Email       string        `bson:"email"`         // unique
+	Password    string        `bson:"password"`
+	CreatedAt   time.Time     `bson:"created_at"`
 }

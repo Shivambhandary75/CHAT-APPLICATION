@@ -1,7 +1,24 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"time"
 
-func SetupRouter() *gin.Engine {
-	return gin.Default()
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+)
+
+func SetupRouter(origins []string) *gin.Engine {
+
+	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     origins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	return r
 }

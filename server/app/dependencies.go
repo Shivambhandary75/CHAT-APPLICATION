@@ -13,26 +13,33 @@ import (
 
 func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 
-	// Token
+	// ===== Token =====
 	tokenRepo := repositories.NewTokenRepository(client, dbName)
 	tokenService := services.NewTokenService(tokenRepo)
 
-	// Auth
+	// ===== Auth =====
 	authRepo := repositories.NewAuthRepository(client, dbName)
 	authService := services.NewAuthService(authRepo)
 	authController := controllers.NewAuthController(authService, tokenService)
-	
+
+	routes.RegisterAuthRoutes(r, authController)
+
+	// Protected test route
 	r.GET("/protected-test", middleware.AuthMiddleware(tokenService), func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "protected ok"})
 	})
 
-	routes.RegisterAuthRoutes(r, authController)
-	
-	// ===== Conversation Module =====
+	// ===== Conversation =====
 	conversationRepo := repositories.NewConversationRepository(client, dbName)
 	conversationService := services.NewConversationService(conversationRepo)
 	conversationController := controllers.NewConversationController(conversationService)
 
 	routes.RegisterConversationRoutes(r, conversationController, tokenService)
-	
+
+	// ===== Message =====
+	messageRepo := repositories.NewMessageRepository(client, dbName)
+	messageService := services.NewMessageService(messageRepo, conversationRepo)
+	messageController := controllers.NewMessageController(messageService)
+
+	routes.RegisterMessageRoutes(r, messageController, tokenService)
 }

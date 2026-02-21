@@ -18,12 +18,18 @@ func NewAuthService(repo *repositories.AuthRepository) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) Register(username, email, password string) error {
+func (s *AuthService) Register(username, displayName, email, password string) error {
 
-	// Check if user already exists
-	existingUser, err := s.repo.FindByEmail(email)
-	if err == nil && existingUser != nil {
+	// Check existing email
+	existingEmail, _ := s.repo.FindByEmail(email)
+	if existingEmail != nil {
 		return fmt.Errorf("email already exists")
+	}
+
+	// Check existing username
+	existingUsername, _ := s.repo.FindByUsername(username)
+	if existingUsername != nil {
+		return fmt.Errorf("username already exists")
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), 14)
@@ -32,10 +38,11 @@ func (s *AuthService) Register(username, email, password string) error {
 	}
 
 	user := models.User{
-		Username:  username,
-		Email:     email,
-		Password:  string(hash),
-		CreatedAt: time.Now(),
+		Username:    username,
+		DisplayName: displayName,
+		Email:       email,
+		Password:    string(hash),
+		CreatedAt:   time.Now(),
 	}
 
 	return s.repo.Create(user)

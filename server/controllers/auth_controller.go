@@ -24,9 +24,10 @@ func NewAuthController(
 
 func (c *AuthController) Register(ctx *gin.Context) {
 	var body struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Username    string `json:"username"`
+		DisplayName string `json:"display_name"`
+		Email       string `json:"email"`
+		Password    string `json:"password"`
 	}
 
 	if err := ctx.ShouldBindJSON(&body); err != nil {
@@ -34,12 +35,15 @@ func (c *AuthController) Register(ctx *gin.Context) {
 		return
 	}
 
-	err := c.service.Register(body.Username, body.Email, body.Password)
+	err := c.service.Register(body.Username, body.DisplayName, body.Email, body.Password)
 	if err != nil {
-		if err.Error() == "email already exists" {
+		if err.Error() == "email already exists" ||
+			err.Error() == "username already exists" {
+
 			ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "registration failed"})
 		return
 	}
