@@ -37,29 +37,13 @@ func (w *WSController) Handle(c *gin.Context) {
 		return
 	}
 
-	client := &ws.Client{
-		UserID: userID,
-		Conn:   conn,
-		Send:   make(chan []byte),
-	}
+	client := ws.NewClient(userID, conn, w.hub)
 
 	w.hub.Register <- client
 
-go client.WritePump()
+	go client.WritePump()
 
-	go func() {
-		defer func() {
-			w.hub.Unregister <- client
-			conn.Close()
-		}()
-
-		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				break
-			}
-
-			w.wsService.HandleMessage(userID, message)
-		}
-	}()
+	go client.ReadPump(func(message []byte) {
+		w.wsService.HandleMessage(userID, message)
+	})
 }

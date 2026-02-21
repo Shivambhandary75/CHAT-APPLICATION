@@ -7,8 +7,8 @@ import (
 )
 
 type WSService struct {
-	hub              *ws.Hub
-	messageService   *MessageService
+	hub                 *ws.Hub
+	messageService      *MessageService
 	conversationService *ConversationService
 }
 
@@ -18,8 +18,8 @@ func NewWSService(
 	conversationService *ConversationService,
 ) *WSService {
 	return &WSService{
-		hub: hub,
-		messageService: messageService,
+		hub:                 hub,
+		messageService:      messageService,
 		conversationService: conversationService,
 	}
 }
@@ -29,29 +29,37 @@ type IncomingMessage struct {
 	Content        string `json:"content"`
 }
 
-func (s *WSService) HandleMessage(senderID string, data []byte) error {
+func (s *WSService) HandleMessage(senderID string, raw []byte) {
 
 	var msg IncomingMessage
-	if err := json.Unmarshal(data, &msg); err != nil {
-		return err
+	err := json.Unmarshal(raw, &msg)
+	if err != nil {
+		return
 	}
 
-	// Save message securely
-	err := s.messageService.SendMessage(msg.ConversationID, senderID, msg.Content)
+	// Save to DB (with security check)
+	err = s.messageService.SendMessage(msg.ConversationID, senderID, msg.Content)
 	if err != nil {
-		return err
+		return
 	}
 
 	// Get participants
 	participants, err := s.conversationService.GetParticipants(msg.ConversationID)
 	if err != nil {
-		return err
+		return
 	}
 
-	// Broadcast
+	// Broadcast to all participants
 	for _, userID := range participants {
+
+		payload := map[string]string{
+			"conversation_id": msg.ConversationID,
+			"sender_id":       senderID,
+			"content":         msg.Content,
+		}
+
+		data, _ := json.Marshal(payload)
+
 		s.hub.SendToUser(userID, data)
 	}
-
-	return nil
 }
