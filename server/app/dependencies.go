@@ -5,10 +5,10 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/controllers"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/middleware"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/repositories"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/routes"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
-	"github.com/Shivambhandary75/CHAT-APPLICATION/server/middleware"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/ws"
 )
 
@@ -43,7 +43,14 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 	messageController := controllers.NewMessageController(messageService)
 
 	routes.RegisterMessageRoutes(r, messageController, tokenService)
-	
+
+	// ===== Friend Module =====
+	friendRepo := repositories.NewFriendRepository(client, dbName)
+	friendService := services.NewFriendService(friendRepo)
+	friendController := controllers.NewFriendController(friendService)
+
+	routes.RegisterFriendRoutes(r, friendController, tokenService)
+
 	// ===== WebSocket Module =====
 	hub := ws.NewHub()
 	go hub.Run()
