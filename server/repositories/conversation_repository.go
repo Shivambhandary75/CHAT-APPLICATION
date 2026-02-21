@@ -92,3 +92,24 @@ func (r *ConversationRepository) FindDirectConversation(participants []string) (
 
 	return &conversation, nil
 }
+
+func (r *ConversationRepository) GetParticipants(conversationID string) ([]string, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objID, err := bson.ObjectIDFromHex(conversationID)
+	if err != nil {
+		return nil, err
+	}
+
+	var conversation models.Conversation
+	err = r.collection.FindOne(ctx, bson.M{
+		"_id": objID,
+	}).Decode(&conversation)
+	if err != nil {
+		return nil, err
+	}
+
+	return conversation.Participants, nil
+}

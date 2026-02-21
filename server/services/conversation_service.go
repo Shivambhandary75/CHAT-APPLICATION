@@ -49,3 +49,7 @@ func (s *ConversationService) CreateDirectConversation(user1, user2 string) (*mo
 func (s *ConversationService) GetUserConversations(userID string) ([]models.Conversation, error) {
 	return s.repo.FindByUser(userID)
 }
+
+func (s *ConversationService) GetParticipants(conversationID string) ([]string, error) {
+	return s.repo.GetParticipants(conversationID)
+}
