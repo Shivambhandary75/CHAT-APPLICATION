@@ -1,19 +1,50 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api/auth";
+import CustomAlert from "../components/CustomAlert";
 import loginImage from "../assets/images/login_image.jpg";
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const [alertState, setAlertState] = useState({
+    isOpen: false,
+    message: "",
+    type: "alert",
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login:", formData);
-    navigate("/dashboard");
+    setIsLoading(true);
+
+    try {
+      const response = await loginUser(formData.email, formData.password);
+      
+      setAlertState({
+        isOpen: true,
+        message: "LOGIN SUCCESSFUL!",
+        type: "success",
+      });
+
+      // Navigate to dashboard after a brief delay
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+    } catch (error) {
+      setAlertState({
+        isOpen: true,
+        message: error.message || "LOGIN FAILED!",
+        type: "alert",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -43,19 +74,20 @@ const Login = () => {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username Field */}
+            {/* Email Field */}
             <div>
               <label className="block font-black text-base mb-1 uppercase">
-                USERNAME
+                EMAIL
               </label>
               <input
-                type="text"
-                name="username"
-                value={formData.username}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                placeholder="Enter your username..."
+                placeholder="Enter your email..."
                 required
+                disabled={isLoading}
                 style={{ fontFamily: "var(--font-display)" }}
               />
             </div>
@@ -73,6 +105,7 @@ const Login = () => {
                 className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
                 placeholder="Enter your password..."
                 required
+                disabled={isLoading}
                 style={{ fontFamily: "var(--font-display)" }}
               />
             </div>
@@ -80,9 +113,10 @@ const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[var(--color-crazy-blue)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+              disabled={isLoading}
+              className="w-full bg-[var(--color-crazy-blue)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              LOGIN
+              {isLoading ? "LOGGING IN..." : "LOGIN"}
             </button>
           </form>
 
@@ -134,6 +168,13 @@ const Login = () => {
           }}
         ></div>
       </div>
+
+      <CustomAlert
+        isOpen={alertState.isOpen}
+        onClose={() => setAlertState({ isOpen: false, message: "", type: "alert" })}
+        message={alertState.message}
+        type={alertState.type}
+      />
     </div>
   );
 };

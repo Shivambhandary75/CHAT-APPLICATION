@@ -1,21 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UserPlus } from "lucide-react";
+import { searchUsers, sendFriendRequest } from "../api/friends";
 import CustomAlert from "./CustomAlert";
-
-const SUGGESTED_USERS = [
-  { id: "1", name: "Glitchy Gab", username: "glitchygab", avatarColor: "bg-[var(--color-crazy-pink)]" },
-  { id: "2", name: "Retro Rex", username: "retrorex", avatarColor: "bg-[var(--color-crazy-blue)]" },
-  { id: "3", name: "Pixel Pete", username: "pixelpete", avatarColor: "bg-[var(--color-crazy-green)]" },
-  { id: "4", name: "Vapor Val", username: "vaporval", avatarColor: "bg-[var(--color-crazy-yellow)]" },
-  { id: "5", name: "Neon Nancy", username: "neonnancy", avatarColor: "bg-[var(--color-crazy-pink)]" },
-  { id: "6", name: "Digital Dan", username: "digitaldan", avatarColor: "bg-[var(--color-crazy-blue)]" },
-  { id: "7", name: "Cyber Cindy", username: "cybercindy", avatarColor: "bg-[var(--color-crazy-green)]" },
-  { id: "8", name: "Rad Ronnie", username: "radronnie", avatarColor: "bg-[var(--color-crazy-yellow)]" },
-];
 
 const AddFriendForm = () => {
   const [newFriendUsername, setNewFriendUsername] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [alertState, setAlertState] = useState({
     isOpen: false,
     message: "",
@@ -23,36 +15,103 @@ const AddFriendForm = () => {
     onConfirm: null,
   });
 
-  const handleAddFriend = () => {
-    if (newFriendUsername.trim()) {
+  // Debounce search
+  useEffect(() => {
+    if (newFriendUsername.trim().length < 2) {
+      setSearchResults([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const users = await searchUsers(newFriendUsername.trim());
+        setSearchResults(users);
+        setShowSuggestions(users.length > 0);
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchResults([]);
+        setShowSuggestions(false);
+        
+        // Show alert if unauthorized
+        if (error.message.includes("unauthorized") || error.message.includes("401")) {
+          setAlertState({
+            isOpen: true,
+            message: "Please login first to search for users",
+            type: "alert",
+          });
+        }
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [newFriendUsername]);
+
+  const handleAddFriend = async () => {
+    if (!newFriendUsername.trim()) {
       setAlertState({
         isOpen: true,
-        message: `FRIEND REQUEST SENT TO ${newFriendUsername.toUpperCase()}!`,
+        message: "Please enter a username",
         type: "alert",
-        onConfirm: null,
+      });
+      return;
+    }
+
+    try {
+      await sendFriendRequest(newFriendUsername.trim());
+      setAlertState({
+        isOpen: true,
+        message: `Friend request sent to @${newFriendUsername}!`,
+        type: "success",
       });
       setNewFriendUsername("");
+      setSearchResults([]);
       setShowSuggestions(false);
+    } catch (error) {
+      setAlertState({
+        isOpen: true,
+        message: error.message || "Failed to send friend request",
+        type: "alert",
+      });
     }
   };
 
   const handleUsernameChange = (value) => {
     setNewFriendUsername(value);
-    setShowSuggestions(value.length > 0);
   };
 
-  const selectSuggestion = (username) => {
-    setNewFriendUsername(username);
-    // Keep suggestions visible briefly to show selection feedback
-    setTimeout(() => {
+  const selectSuggestion = async (username) => {
+    try {
+      await sendFriendRequest(username);
+      setAlertState({
+        isOpen: true,
+        message: `Friend request sent to @${username}!`,
+        type: "success",
+      });
+      setNewFriendUsername("");
+      setSearchResults([]);
       setShowSuggestions(false);
-    }, 300);
+    } catch (error) {
+      setAlertState({
+        isOpen: true,
+        message: error.message || "Failed to send friend request",
+        type: "alert",
+      });
+    }
   };
 
-  const filteredSuggestions = SUGGESTED_USERS.filter(user =>
-    user.username.toLowerCase().includes(newFriendUsername.toLowerCase()) ||
-    user.name.toLowerCase().includes(newFriendUsername.toLowerCase())
-  );
+  const getAvatarColor = (index) => {
+    const colors = [
+      "bg-[var(--color-crazy-pink)]",
+      "bg-[var(--color-crazy-blue)]",
+      "bg-[var(--color-crazy-green)]",
+      "bg-[var(--color-crazy-yellow)]",
+    ];
+    return colors[index % colors.length];
+  };
 
   return (
     <div className="h-full bg-[var(--color-crazy-yellow)] flex flex-col">
@@ -95,23 +154,33 @@ const AddFriendForm = () => {
                 </div>
                 
                 {/* Suggestions Dropdown */}
-                {showSuggestions && filteredSuggestions.length > 0 && (
+                {showSuggestions && (
                   <div className="absolute top-full left-0 right-0 mt-2 border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-h-64 overflow-y-auto z-10">
-                    {filteredSuggestions.map((user) => (
-                      <button
-                        key={user.id}
-                        onClick={() => selectSuggestion(user.username)}
-                        className="w-full p-3 border-b-3 border-black hover:bg-[var(--color-crazy-yellow)] active:bg-[var(--color-crazy-green)] active:scale-95 transition-all text-left flex items-center gap-3"
-                      >
-                        <div className={`w-10 h-10 ${user.avatarColor} border-3 border-black rounded-full flex items-center justify-center font-black text-xs`}>
-                          {user.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-black">{user.name}</p>
-                          <p className="font-bold text-xs">@{user.username}</p>
-                        </div>
-                      </button>
-                    ))}
+                    {isSearching ? (
+                      <div className="p-6 text-center">
+                        <p className="font-bold">Searching...</p>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map((user, index) => (
+                        <button
+                          key={user.id}
+                          onClick={() => selectSuggestion(user.username)}
+                          className="w-full p-3 border-b-3 border-black hover:bg-[var(--color-crazy-yellow)] active:bg-[var(--color-crazy-green)] active:scale-95 transition-all text-left flex items-center gap-3"
+                        >
+                          <div className={`w-10 h-10 ${getAvatarColor(index)} border-3 border-black rounded-full flex items-center justify-center font-black text-xs`}>
+                            {user.display_name ? user.display_name.substring(0, 2).toUpperCase() : user.username.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-black">{user.display_name || user.username}</p>
+                            <p className="font-bold text-xs">@{user.username}</p>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-6 text-center">
+                        <p className="font-bold">No users found</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

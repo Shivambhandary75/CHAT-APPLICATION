@@ -1,0 +1,144 @@
+import { API_ENDPOINTS } from "./config";
+
+// Register a new user
+export const registerUser = async (
+  username,
+  email,
+  password,
+  displayName = "",
+) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+        display_name: displayName || username,
+      }),
+    });
+
+    // Try to parse JSON response
+    let data = null;
+    try {
+      const text = await response.text();
+      if (text) {
+        data = JSON.parse(text);
+      }
+    } catch (e) {
+      // If JSON parsing fails, use default error
+      data = { error: "registration failed" };
+    }
+
+    // If response is not ok, throw the error from backend
+    if (!response.ok) {
+      throw new Error(data?.error || "registration failed");
+    }
+
+    return data;
+  } catch (error) {
+    // Re-throw the error with its message intact
+    throw error;
+  }
+};
+
+// Login user
+export const loginUser = async (email, password) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    // Try to parse JSON response
+    let data = null;
+    try {
+      const text = await response.text();
+      if (text) {
+        data = JSON.parse(text);
+      }
+    } catch (e) {
+      // If JSON parsing fails, use default error
+      data = { error: "invalid credentials" };
+    }
+
+    // If response is not ok, throw the error from backend
+    if (!response.ok) {
+      throw new Error(data?.error || "invalid credentials");
+    }
+
+    // Store token in localStorage
+    if (data.token) {
+      localStorage.setItem("authToken", data.token);
+    }
+
+    return data;
+  } catch (error) {
+    // Re-throw the error with its message intact
+    throw error;
+  }
+};
+
+// Logout user
+export const logoutUser = async () => {
+  try {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      throw new Error("No token found");
+    }
+
+    const response = await fetch(API_ENDPOINTS.AUTH.LOGOUT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      // If JSON parsing fails, still clear token on successful status
+      if (response.ok) {
+        localStorage.removeItem("authToken");
+        return { status: "logged out" };
+      }
+      throw new Error("Server response error");
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || "Logout failed");
+    }
+
+    // Clear token from localStorage
+    localStorage.removeItem("authToken");
+
+    return data;
+  } catch (error) {
+    if (error.message) {
+      throw error;
+    }
+    throw new Error("Network error. Please check your connection.");
+  }
+};
+
+// Check if user is authenticated
+export const isAuthenticated = () => {
+  return !!localStorage.getItem("authToken");
+};
+
+// Get token
+export const getToken = () => {
+  return localStorage.getItem("authToken");
+};

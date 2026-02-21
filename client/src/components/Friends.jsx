@@ -1,21 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UserPlus, MessageCircle, UserMinus, Search } from "lucide-react";
+import { getFriends, sendFriendRequest, removeFriend } from "../api/friends";
 import CustomAlert from "./CustomAlert";
 
-const FRIENDS_DATA = [
-  { id: "1", name: "Glitchy Gab", username: "glitchygab", avatarColor: "bg-[var(--color-crazy-pink)]", status: "online" },
-  { id: "2", name: "Retro Rex", username: "retrorex", avatarColor: "bg-[var(--color-crazy-blue)]", status: "offline" },
-  { id: "3", name: "Pixel Pete", username: "pixelpete", avatarColor: "bg-[var(--color-crazy-green)]", status: "online" },
-  { id: "4", name: "Vapor Val", username: "vaporval", avatarColor: "bg-[var(--color-crazy-yellow)]", status: "online" },
-  { id: "5", name: "Neon Nancy", username: "neonnancy", avatarColor: "bg-[var(--color-crazy-pink)]", status: "offline" },
-  { id: "6", name: "Digital Dan", username: "digitaldan", avatarColor: "bg-[var(--color-crazy-blue)]", status: "online" },
-];
-
 const Friends = ({ onSelectFriend, showAddSection = true }) => {
-  const [friends, setFriends] = useState(FRIENDS_DATA);
+  const [friends, setFriends] = useState([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [newFriendUsername, setNewFriendUsername] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [alertState, setAlertState] = useState({
     isOpen: false,
     message: "",
@@ -23,31 +16,92 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
     onConfirm: null,
   });
 
-  const filteredFriends = friends.filter(friend =>
-    friend.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    friend.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Fetch friends on component mount
+  useEffect(() => {
+    loadFriends();
+  }, []);
 
-  const handleAddFriend = () => {
-    if (newFriendUsername.trim()) {
+  const loadFriends = async () => {
+    setIsLoading(true);
+    try {
+      const friendsData = await getFriends();
+      setFriends(friendsData);
+    } catch (error) {
       setAlertState({
         isOpen: true,
-        message: `FRIEND REQUEST SENT TO ${newFriendUsername.toUpperCase()}!`,
+        message: error.message.toUpperCase() || "FAILED TO LOAD FRIENDS!",
         type: "alert",
         onConfirm: null,
       });
-      setNewFriendUsername("");
-      setShowAddFriend(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredFriends = friends.filter(friend =>
+    friend.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleAddFriend = async () => {
+    if (newFriendUsername.trim()) {
+      try {
+        await sendFriendRequest(newFriendUsername.trim());
+        setAlertState({
+          isOpen: true,
+          message: `FRIEND REQUEST SENT TO @${newFriendUsername.toUpperCase()}!`,
+          type: "alert",
+          onConfirm: null,
+        });
+        setNewFriendUsername("");
+        setShowAddFriend(false);
+      } catch (error) {
+        setAlertState({
+          isOpen: true,
+          message: error.message.toUpperCase() || "FAILED TO SEND FRIEND REQUEST!",
+          type: "alert",
+          onConfirm: null,
+        });
+      }
     }
   };
 
   const handleRemoveFriend = (friend) => {
     setAlertState({
       isOpen: true,
-      message: `REMOVE ${friend.name.toUpperCase()} FROM YOUR FRIENDS?`,
+      message: `REMOVE ${friend.display_name?.toUpperCase() || friend.username.toUpperCase()} FROM YOUR FRIENDS?`,
       type: "confirm",
-      onConfirm: () => setFriends(friends.filter((f) => f.id !== friend.id)),
+      onConfirm: async () => {
+        try {
+          await removeFriend(friend.username);
+          setFriends(friends.filter(f => f.username !== friend.username));
+          setAlertState({
+            isOpen: true,
+            message: "FRIEND REMOVED!",
+            type: "alert",
+            onConfirm: null,
+          });
+        } catch (error) {
+          setAlertState({
+            isOpen: true,
+            message: error.message.toUpperCase() || "FAILED TO REMOVE FRIEND!",
+            type: "alert",
+            onConfirm: null,
+          });
+        }
+      },
     });
+  };
+
+  // Helper to get avatar color
+  const getAvatarColor = (index) => {
+    const colors = [
+      "bg-[var(--color-crazy-pink)]",
+      "bg-[var(--color-crazy-blue)]",
+      "bg-[var(--color-crazy-green)]",
+      "bg-[var(--color-crazy-yellow)]",
+    ];
+    return colors[index % colors.length];
   };
 
   return (
@@ -114,51 +168,60 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
 
       {/* Friends List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {filteredFriends.map((friend) => (
-          <div
-            key={friend.id}
-            className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="relative">
-                  <div className={`w-12 h-12 ${friend.avatarColor} border-4 border-black rounded-full flex items-center justify-center font-black text-sm`}>
-                    {friend.name.substring(0, 2).toUpperCase()}
+        {isLoading ? (
+          <div className="bg-white border-4 border-black p-8 text-center">
+            <p className="font-black text-lg uppercase">LOADING FRIENDS...</p>
+          </div>
+        ) : filteredFriends.length === 0 ? (
+          <div className="bg-white border-4 border-black p-8 text-center">
+            <p className="font-black text-lg uppercase">
+              {searchQuery ? "NO FRIENDS FOUND" : "NO FRIENDS YET"}
+            </p>
+            <p className="font-bold text-sm mt-2">
+              {searchQuery ? "Try a different search term" : "Add friends to start chatting!"}
+            </p>
+          </div>
+        ) : (
+          filteredFriends.map((friend, index) => (
+            <div
+              key={friend.id}
+              className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="relative">
+                    <div className={`w-12 h-12 ${getAvatarColor(index)} border-4 border-black rounded-full flex items-center justify-center font-black text-sm`}>
+                      {(friend.display_name || friend.username).substring(0, 2).toUpperCase()}
+                    </div>
+                    {friend.status === "online" && (
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[var(--color-crazy-green)] border-2 border-black rounded-full"></div>
+                    )}
                   </div>
-                  {friend.status === "online" && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[var(--color-crazy-green)] border-2 border-black rounded-full"></div>
-                  )}
+                  <div className="flex-1">
+                    <h3 className="font-black text-lg">{friend.display_name || friend.username}</h3>
+                    <p className="font-bold text-sm">@{friend.username}</p>
+                    <p className="font-bold text-xs uppercase mt-1">
+                      {friend.status === "online" ? "ONLINE NOW!" : "LAST SEEN RECENTLY"}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-lg">{friend.name}</h3>
-                  <p className="font-bold text-sm">@{friend.username}</p>
-                  <p className="font-bold text-xs uppercase mt-1">
-                    {friend.status === "online" ? "ONLINE NOW!" : "LAST SEEN RECENTLY"}
-                  </p>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => onSelectFriend && onSelectFriend(friend)}
+                    className="bg-[var(--color-crazy-blue)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+                  >
+                    <MessageCircle size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleRemoveFriend(friend)}
+                    className="bg-[var(--color-crazy-pink)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+                  >
+                    <UserMinus size={18} />
+                  </button>
                 </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => onSelectFriend && onSelectFriend(friend)}
-                  className="bg-[var(--color-crazy-blue)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
-                >
-                  <MessageCircle size={18} />
-                </button>
-                <button
-                  onClick={() => handleRemoveFriend(friend)}
-                  className="bg-[var(--color-crazy-pink)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
-                >
-                  <UserMinus size={18} />
-                </button>
               </div>
             </div>
-          </div>
-        ))}
-        {filteredFriends.length === 0 && (
-          <div className="bg-white border-4 border-black p-8 text-center">
-            <p className="font-black text-lg uppercase">NO FRIENDS FOUND</p>
-            <p className="font-bold text-sm mt-2">Try a different search term</p>
-          </div>
+          ))
         )}
       </div>
 
