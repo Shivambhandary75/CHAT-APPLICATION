@@ -9,7 +9,7 @@ import (
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/routes"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/middleware"
-	"github.com/Shivambhandary75/CHAT-APPLICATION/server/realtime"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/ws"
 )
 
 func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
@@ -44,14 +44,12 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 
 	routes.RegisterMessageRoutes(r, messageController, tokenService)
 	
-	// ===== Realtime Module =====
-	hub := realtime.NewHub()
+	// ===== WebSocket Module =====
+	hub := ws.NewHub()
+	go hub.Run()
 
-	wsController := controllers.NewWSController(
-		hub,
-		messageService,
-		conversationService,
-	)
+	wsService := services.NewWSService(hub, messageService, conversationService)
+	wsController := controllers.NewWSController(hub, wsService)
 
-	r.GET("/ws", wsController.Handle)
+	routes.RegisterWSRoutes(r, wsController, tokenService)
 }

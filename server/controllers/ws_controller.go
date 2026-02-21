@@ -1,90 +1,65 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/Shivambhandary75/CHAT-APPLICATION/server/realtime"
-	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
-	"github.com/Shivambhandary75/CHAT-APPLICATION/server/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/ws"
 )
 
 type WSController struct {
-	hub                 *realtime.Hub
-	messageService      *services.MessageService
-	conversationService *services.ConversationService
+	hub       *ws.Hub
+	wsService *services.WSService
 }
 
-func NewWSController(
-	hub *realtime.Hub,
-	messageService *services.MessageService,
-	conversationService *services.ConversationService,
-) *WSController {
+func NewWSController(hub *ws.Hub, wsService *services.WSService) *WSController {
 	return &WSController{
-		hub: hub,
-		messageService: messageService,
-		conversationService: conversationService,
+		hub:       hub,
+		wsService: wsService,
 	}
 }
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 func (w *WSController) Handle(c *gin.Context) {
 
-	token := c.Query("token")
-
-	userID, err := utils.ParseToken(token)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-		return
-	}
+	userID := c.GetString("user_id")
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		return
 	}
 
-	client := realtime.NewClient(conn)
-	w.hub.Register(userID, client)
+	client := &ws.Client{
+		UserID: userID,
+		Conn:   conn,
+		Send:   make(chan []byte),
+	}
 
-	go client.WritePump()
+	w.hub.Register <- client
 
-	client.ReadPump(func(message []byte) {
+go client.WritePump()
 
-		var payload struct {
-			ConversationID string `json:"conversation_id"`
-			Content        string `json:"content"`
+	go func() {
+		defer func() {
+			w.hub.Unregister <- client
+			conn.Close()
+		}()
+
+		for {
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				break
+			}
+
+			w.wsService.HandleMessage(userID, message)
 		}
-
-		if err := json.Unmarshal(message, &payload); err != nil {
-			return
-		}
-
-		// Save message (includes membership validation)
-		err := w.messageService.SendMessage(
-			payload.ConversationID,
-			userID,
-			payload.Content,
-		)
-		if err != nil {
-			return
-		}
-
-		participants, err := w.conversationService.
-			GetParticipants(payload.ConversationID)
-		if err != nil {
-			return
-		}
-
-		// Send to both users
-		for _, p := range participants {
-			w.hub.SendToUser(p, message)
-		}
-	})
-
-	w.hub.Unregister(userID, client)
+	}()
 }
