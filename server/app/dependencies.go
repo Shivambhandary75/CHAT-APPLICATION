@@ -1,0 +1,38 @@
+package app
+
+import (
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/controllers"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/repositories"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/routes"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/middleware"
+)
+
+func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
+
+	// Token
+	tokenRepo := repositories.NewTokenRepository(client, dbName)
+	tokenService := services.NewTokenService(tokenRepo)
+
+	// Auth
+	authRepo := repositories.NewAuthRepository(client, dbName)
+	authService := services.NewAuthService(authRepo)
+	authController := controllers.NewAuthController(authService, tokenService)
+	
+	r.GET("/protected-test", middleware.AuthMiddleware(tokenService), func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "protected ok"})
+	})
+
+	routes.RegisterAuthRoutes(r, authController)
+	
+	// ===== Conversation Module =====
+	conversationRepo := repositories.NewConversationRepository(client, dbName)
+	conversationService := services.NewConversationService(conversationRepo)
+	conversationController := controllers.NewConversationController(conversationService)
+
+	routes.RegisterConversationRoutes(r, conversationController, tokenService)
+	
+}
