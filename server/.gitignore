@@ -1,13 +1,2 @@
 .env
-.env.local
-*.exe
-main
-server
-chat-app
-*.test
-*.out
 .vscode/
-.idea/
-*.log
-.DS_Store
-Thumbs.db
