@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { UserPlus, MessageCircle, UserMinus, Search } from "lucide-react";
-import { getFriends, sendFriendRequest } from "../api/friends";
+import { getFriends, sendFriendRequest, removeFriend } from "../api/friends";
 import CustomAlert from "./CustomAlert";
 
 const Friends = ({ onSelectFriend, showAddSection = true }) => {
@@ -71,14 +71,24 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
       isOpen: true,
       message: `REMOVE ${friend.display_name?.toUpperCase() || friend.username.toUpperCase()} FROM YOUR FRIENDS?`,
       type: "confirm",
-      onConfirm: () => {
-        // TODO: Implement remove friend API call
-        setAlertState({
-          isOpen: true,
-          message: "FEATURE COMING SOON!",
-          type: "alert",
-          onConfirm: null,
-        });
+      onConfirm: async () => {
+        try {
+          await removeFriend(friend.username);
+          setFriends(friends.filter(f => f.username !== friend.username));
+          setAlertState({
+            isOpen: true,
+            message: "FRIEND REMOVED!",
+            type: "alert",
+            onConfirm: null,
+          });
+        } catch (error) {
+          setAlertState({
+            isOpen: true,
+            message: error.message.toUpperCase() || "FAILED TO REMOVE FRIEND!",
+            type: "alert",
+            onConfirm: null,
+          });
+        }
       },
     });
   };

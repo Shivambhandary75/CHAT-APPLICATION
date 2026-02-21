@@ -15,6 +15,7 @@ func RegisterFriendRoutes(r *gin.Engine, controller *controllers.FriendControlle
 		friends.POST("/accept/:id", controller.AcceptRequest)
 		friends.POST("/reject/:id", controller.RejectRequest)
 		friends.DELETE("/cancel/:id", controller.CancelRequest)
+		friends.DELETE("/remove", controller.RemoveFriend)
 		friends.GET("/requests/received", controller.GetReceivedRequests)
 		friends.GET("/requests/sent", controller.GetSentRequests)
 		friends.GET("", controller.GetFriends)

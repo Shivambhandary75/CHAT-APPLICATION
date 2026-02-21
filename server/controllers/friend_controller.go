@@ -279,3 +279,42 @@ func (c *FriendController) SearchUsers(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"users": users})
 }
+
+// Remove friend
+func (c *FriendController) RemoveFriend(ctx *gin.Context) {
+	var body struct {
+		Username string `json:"username"`
+	}
+
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+		return
+	}
+
+	userIDStr, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	userID, err := bson.ObjectIDFromHex(userIDStr.(string))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	err = c.service.RemoveFriend(userID, body.Username)
+	if err != nil {
+		switch err.Error() {
+		case "user not found":
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		case "not friends with this user":
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "not friends with this user"})
+		default:
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove friend"})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "friend removed"})
+}

@@ -251,3 +251,35 @@ export const searchUsers = async (query) => {
     throw error;
   }
 };
+
+// Remove friend
+export const removeFriend = async (username) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.FRIENDS.REMOVE_FRIEND, {
+      method: "DELETE",
+      headers: getAuthHeader(),
+      body: JSON.stringify({ username }),
+    });
+
+    let data = null;
+    try {
+      const text = await response.text();
+      if (text) {
+        data = JSON.parse(text);
+      }
+    } catch (e) {
+      data = { error: "invalid response" };
+    }
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("unauthorized - please login first");
+      }
+      throw new Error(data?.error || "failed to remove friend");
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};

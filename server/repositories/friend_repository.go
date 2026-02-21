@@ -39,7 +39,7 @@ func (r *FriendRepository) CreateRequest(senderID, receiverID bson.ObjectID) err
 	return err
 }
 
-// Find request by sender and receiver
+// Find request by sender and receiver (only pending requests)
 func (r *FriendRepository) FindRequest(senderID, receiverID bson.ObjectID) (*models.FriendRequest, error) {
 	var request models.FriendRequest
 	err := r.friendRequestCollection.FindOne(
@@ -47,6 +47,7 @@ func (r *FriendRepository) FindRequest(senderID, receiverID bson.ObjectID) (*mod
 		bson.M{
 			"sender_id":   senderID,
 			"receiver_id": receiverID,
+			"status":      "pending",
 		},
 	).Decode(&request)
 
@@ -264,4 +265,18 @@ func (r *FriendRepository) SearchUsers(query string, limit int) ([]models.User, 
 		return nil, err
 	}
 	return users, nil
+}
+
+// Delete friendship
+func (r *FriendRepository) DeleteFriendship(user1ID, user2ID bson.ObjectID) error {
+	_, err := r.friendshipCollection.DeleteOne(
+		context.Background(),
+		bson.M{
+			"$or": []bson.M{
+				{"user1_id": user1ID, "user2_id": user2ID},
+				{"user1_id": user2ID, "user2_id": user1ID},
+			},
+		},
+	)
+	return err
 }

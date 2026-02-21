@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     ACCEPT_REQUEST: (id) => `${API_BASE_URL}/api/friends/accept/${id}`,
     REJECT_REQUEST: (id) => `${API_BASE_URL}/api/friends/reject/${id}`,
     CANCEL_REQUEST: (id) => `${API_BASE_URL}/api/friends/cancel/${id}`,
+    REMOVE_FRIEND: `${API_BASE_URL}/api/friends/remove`,
     RECEIVED_REQUESTS: `${API_BASE_URL}/api/friends/requests/received`,
     SENT_REQUESTS: `${API_BASE_URL}/api/friends/requests/sent`,
     LIST: `${API_BASE_URL}/api/friends`,

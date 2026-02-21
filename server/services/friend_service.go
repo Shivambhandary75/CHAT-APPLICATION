@@ -78,14 +78,14 @@ func (s *FriendService) AcceptRequest(requestID bson.ObjectID, userID bson.Objec
 		return errors.New("request is no longer pending")
 	}
 
-	// Update request status
-	err = s.repo.UpdateRequestStatus(requestID, "accepted")
+	// Create friendship
+	err = s.repo.CreateFriendship(request.SenderID, request.ReceiverID)
 	if err != nil {
 		return err
 	}
 
-	// Create friendship
-	return s.repo.CreateFriendship(request.SenderID, request.ReceiverID)
+	// Delete the request after accepting
+	return s.repo.DeleteRequest(requestID)
 }
 
 // Reject friend request
@@ -248,4 +248,28 @@ func (s *FriendService) SearchUsers(query string, currentUserID bson.ObjectID) (
 	}
 
 	return result, nil
+}
+
+// Remove friend
+func (s *FriendService) RemoveFriend(userID bson.ObjectID, friendUsername string) error {
+	// Find friend by username
+	friend, err := s.repo.FindUserByUsername(friendUsername)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("user not found")
+		}
+		return err
+	}
+
+	// Check if they are friends
+	isFriend, err := s.repo.FriendshipExists(userID, friend.ID)
+	if err != nil {
+		return err
+	}
+	if !isFriend {
+		return errors.New("not friends with this user")
+	}
+
+	// Delete the friendship
+	return s.repo.DeleteFriendship(userID, friend.ID)
 }
