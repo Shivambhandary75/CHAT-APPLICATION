@@ -1,9 +1,9 @@
 package services
 
 import (
-	"time"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/models"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/repositories"
@@ -16,7 +16,6 @@ type ConversationService struct {
 func NewConversationService(repo *repositories.ConversationRepository) *ConversationService {
 	return &ConversationService{repo: repo}
 }
-
 
 func (s *ConversationService) CreateDirectConversation(user1, user2 string) (*models.Conversation, error) {
 

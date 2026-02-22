@@ -1,13 +1,15 @@
 package utils
 
 import (
-	"time"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET")) // move to env later
+func jwtSecret() []byte {
+	return []byte(os.Getenv("JWT_SECRET"))
+}
 
 func GenerateToken(userID string) (string, error) {
 	claims := jwt.MapClaims{
@@ -16,12 +18,12 @@ func GenerateToken(userID string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
+	return token.SignedString(jwtSecret())
 }
 
 func ParseToken(tokenString string) (string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
+		return jwtSecret(), nil
 	})
 
 	if err != nil || !token.Valid {

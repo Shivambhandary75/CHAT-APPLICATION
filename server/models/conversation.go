@@ -7,8 +7,8 @@ import (
 )
 
 type Conversation struct {
-	ID           bson.ObjectID		`bson:"_id,omitempty"`
-	Type         string             `bson:"type"` // "direct", "group"
-	Participants []string           `bson:"participants"`
-	CreatedAt    time.Time          `bson:"created_at"`
+	ID           bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	Type         string        `bson:"type"          json:"type"` // "direct"
+	Participants []string      `bson:"participants"  json:"participants"`
+	CreatedAt    time.Time     `bson:"created_at"    json:"created_at"`
 }

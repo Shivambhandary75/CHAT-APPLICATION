@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { LogOut, User, Camera, Edit2, Save, MessageCircle, Users, UserPlus, FolderPlus, Inbox } from "lucide-react";
+import { LogOut, User, MessageCircle, Users, UserPlus, FolderPlus, Inbox } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ChatSection from "../components/ChatSection";
 import ChatList from "../components/ChatList";
@@ -7,23 +7,15 @@ import Friends from "../components/Friends";
 import Groups from "../components/Groups";
 import Profile from "../components/Profile";
 import AddFriendForm from "../components/AddFriendForm";
-import CreateGroupForm from "../components/CreateGroupForm";
 import GroupSettings from "../components/GroupSettings";
 import Requests from "../components/Requests";
 import CustomAlert from "../components/CustomAlert";
 import { logoutUser, getProfile } from "../api/auth";
 
-const CONTACTS = [
-  { id: "1", name: "Glitchy Gab", username: "glitchygab", avatarColor: "bg-[var(--color-crazy-pink)]", status: "online" },
-  { id: "2", name: "Retro Rex", username: "retrorex", avatarColor: "bg-[var(--color-crazy-blue)]", status: "offline" },
-  { id: "3", name: "Pixel Pete", username: "pixelpete", avatarColor: "bg-[var(--color-crazy-green)]", status: "online" },
-  { id: "4", name: "Vapor Val", username: "vaporval", avatarColor: "bg-[var(--color-crazy-yellow)]", status: "online" },
-];
-
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeView, setActiveView] = useState("chatList"); // chatList, chat, friends, groups, profile, addFriend, createGroup
-  const [activeContact, setActiveContact] = useState(CONTACTS[0]);
+  const [activeView, setActiveView] = useState("chatList");
+  const [activeContact, setActiveContact] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -172,15 +164,7 @@ const Dashboard = () => {
             ADD FRIEND
           </button>
 
-          <button
-            onClick={() => handleMenuClick("createGroup")}
-            className={`w-full ${
-              activeView === "createGroup" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-blue)]"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
-          >
-            <FolderPlus size={20} />
-            CREATE GROUP
-          </button>
+
         </div>
 
         {/* Logout Button */}
@@ -203,10 +187,9 @@ const Dashboard = () => {
           {activeView === "chat" && <ChatSection activeContact={activeContact} onBack={handleBackToChat} />}
           {activeView === "friends" && <Friends onSelectFriend={handleSelectContact} showAddSection={false} />}
           {activeView === "requests" && <Requests />}
-          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} showCreateSection={false} onGroupSettings={handleGroupSettings} />}
+          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} onGroupSettings={handleGroupSettings} />}
           {activeView === "profile" && <Profile profileData={profileData} onSave={handleSaveProfile} />}
           {activeView === "addFriend" && <AddFriendForm />}
-          {activeView === "createGroup" && <CreateGroupForm />}
         </div>
       </div>
 
