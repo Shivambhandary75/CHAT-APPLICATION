@@ -138,6 +138,38 @@ export const isAuthenticated = () => {
   return !!localStorage.getItem("authToken");
 };
 
+// Verify token with backend
+export const verifyToken = async () => {
+  try {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      return false;
+    }
+
+    const response = await fetch(API_ENDPOINTS.AUTH.VERIFY, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // Token is invalid, remove it
+      localStorage.removeItem("authToken");
+      return false;
+    }
+
+    const data = await response.json();
+    return data.valid === true;
+  } catch (error) {
+    // On error, remove token and return false
+    localStorage.removeItem("authToken");
+    return false;
+  }
+};
+
 // Get token
 export const getToken = () => {
   return localStorage.getItem("authToken");

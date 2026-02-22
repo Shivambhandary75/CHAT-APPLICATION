@@ -23,7 +23,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 	authService := services.NewAuthService(authRepo)
 	authController := controllers.NewAuthController(authService, tokenService)
 
-	routes.RegisterAuthRoutes(r, authController)
+	routes.RegisterAuthRoutes(r, authController, tokenService)
 
 	// Protected test route
 	r.GET("/protected-test", middleware.AuthMiddleware(tokenService), func(c *gin.Context) {
