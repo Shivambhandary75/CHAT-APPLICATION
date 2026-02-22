@@ -174,3 +174,40 @@ export const verifyToken = async () => {
 export const getToken = () => {
   return localStorage.getItem("authToken");
 };
+
+// Get user profile from backend
+export const getProfile = async () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(API_ENDPOINTS.AUTH.PROFILE, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Failed to get profile");
+  return data;
+};
+
+// Update user display name
+export const updateProfile = async (displayName) => {
+  const token = localStorage.getItem("authToken");
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(API_ENDPOINTS.AUTH.PROFILE, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ display_name: displayName }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Failed to update profile");
+  return data;
+};

@@ -14,5 +14,7 @@ func RegisterAuthRoutes(r *gin.Engine, controller *controllers.AuthController, t
 		auth.POST("/login", controller.Login)
 		auth.POST("/logout", controller.Logout)
 		auth.GET("/verify", middleware.AuthMiddleware(tokenService), controller.Verify)
+		auth.GET("/profile", middleware.AuthMiddleware(tokenService), controller.GetProfile)
+		auth.PUT("/profile", middleware.AuthMiddleware(tokenService), controller.UpdateProfile)
 	}
 }

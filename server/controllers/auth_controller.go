@@ -7,6 +7,7 @@ import (
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
 	"github.com/gin-gonic/gin"
 )
+
 type AuthController struct {
 	service      *services.AuthService
 	tokenService *services.TokenService
@@ -98,4 +99,48 @@ func (c *AuthController) Verify(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"valid": true, "user_id": userID})
+}
+
+func (c *AuthController) GetProfile(ctx *gin.Context) {
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	user, err := c.service.GetProfile(userID)
+	if err != nil || user == nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get profile"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"id":           user.ID.Hex(),
+		"username":     user.Username,
+		"display_name": user.DisplayName,
+		"email":        user.Email,
+	})
+}
+
+func (c *AuthController) UpdateProfile(ctx *gin.Context) {
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var body struct {
+		DisplayName string `json:"display_name"`
+	}
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+		return
+	}
+
+	if err := c.service.UpdateProfile(userID, body.DisplayName); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "profile updated"})
 }

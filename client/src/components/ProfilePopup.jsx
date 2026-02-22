@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Camera, Save, User } from "lucide-react";
 
 const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
-  const [editedProfile, setEditedProfile] = useState({ ...profileData });
+  const [editedProfile, setEditedProfile] = useState({
+    name: "",
+    username: "",
+    photo: null,
+    ...profileData,
+  });
+
+  useEffect(() => {
+    if (isOpen) setEditedProfile({ name: "", username: "", photo: null, ...profileData });
+  }, [isOpen, profileData]);
 
   if (!isOpen) return null;
 
@@ -90,13 +99,14 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
               <span className="bg-black text-white border-4 border-r-0 border-black px-3 py-3 font-black">@</span>
               <input
                 type="text"
-                value={editedProfile.username}
-                onChange={(e) => setEditedProfile({ ...editedProfile, username: e.target.value })}
-                className="flex-1 border-4 border-black px-4 py-3 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
+                value={editedProfile.username || ""}
+                readOnly
+                className="flex-1 border-4 border-black px-4 py-3 text-base font-bold bg-gray-100 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none cursor-not-allowed"
                 placeholder="username"
                 style={{ fontFamily: "var(--font-display)" }}
               />
             </div>
+            <p className="mt-1 text-xs font-bold text-gray-500">Username cannot be changed</p>
           </div>
 
           {/* Buttons */}

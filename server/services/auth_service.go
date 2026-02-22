@@ -1,8 +1,8 @@
 package services
 
 import (
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/models"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/repositories"
@@ -59,4 +59,15 @@ func (s *AuthService) Login(email, password string) (string, error) {
 	}
 
 	return utils.GenerateToken(user.ID.Hex())
+}
+
+func (s *AuthService) GetProfile(userID string) (*models.User, error) {
+	return s.repo.FindByID(userID)
+}
+
+func (s *AuthService) UpdateProfile(userID string, displayName string) error {
+	if displayName == "" {
+		return fmt.Errorf("display name cannot be empty")
+	}
+	return s.repo.UpdateDisplayName(userID, displayName)
 }

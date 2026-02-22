@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Camera, Save, User } from "lucide-react";
 
 const Profile = ({ profileData, onSave }) => {
-  const [editedProfile, setEditedProfile] = useState({ ...profileData });
+  const [editedProfile, setEditedProfile] = useState({
+    name: "",
+    username: "",
+    photo: null,
+    ...profileData,
+  });
+
+  useEffect(() => {
+    if (profileData) setEditedProfile({ name: "", username: "", photo: null, ...profileData });
+  }, [profileData]);
   const [isEditing, setIsEditing] = useState(false);
 
   const handlePhotoUpload = (e) => {
@@ -89,17 +98,20 @@ const Profile = ({ profileData, onSave }) => {
             <div>
               <label className="block font-black text-lg mb-3 uppercase">Username</label>
               {isEditing ? (
-                <div className="flex items-center">
-                  <span className="bg-black text-white border-4 border-r-0 border-black px-4 py-3 font-black text-lg">@</span>
-                  <input
-                    type="text"
-                    value={editedProfile.username}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, username: e.target.value })}
-                    className="flex-1 border-4 border-black px-4 py-3 text-lg font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                    placeholder="username"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  />
-                </div>
+                <>
+                  <div className="flex items-center">
+                    <span className="bg-black text-white border-4 border-r-0 border-black px-4 py-3 font-black text-lg">@</span>
+                    <input
+                      type="text"
+                      value={editedProfile.username || ""}
+                      readOnly
+                      className="flex-1 border-4 border-black px-4 py-3 text-lg font-bold bg-gray-100 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none cursor-not-allowed"
+                      placeholder="username"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    />
+                  </div>
+                  <p className="mt-2 text-sm font-bold text-gray-500">Username cannot be changed</p>
+                </>
               ) : (
                 <div className="w-full border-4 border-black px-4 py-3 text-lg font-black bg-[var(--color-crazy-green)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   @{editedProfile.username}
