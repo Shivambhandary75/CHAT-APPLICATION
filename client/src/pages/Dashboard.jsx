@@ -11,6 +11,7 @@ import CreateGroupForm from "../components/CreateGroupForm";
 import GroupSettings from "../components/GroupSettings";
 import Requests from "../components/Requests";
 import CustomAlert from "../components/CustomAlert";
+import { logoutUser } from "../api/auth";
 
 const CONTACTS = [
   { id: "1", name: "Glitchy Gab", username: "glitchygab", avatarColor: "bg-[var(--color-crazy-pink)]", status: "online" },
@@ -40,7 +41,16 @@ const Dashboard = () => {
     setConfirmState({
       isOpen: true,
       message: "DO U WANT TO LOGOUT?",
-      onConfirm: () => navigate("/"),
+      onConfirm: async () => {
+        try {
+          await logoutUser();
+        } catch (error) {
+          console.error("Logout error:", error);
+        } finally {
+          // Navigate to login even if logout fails (token will be cleared)
+          navigate("/login");
+        }
+      },
     });
   };
 
