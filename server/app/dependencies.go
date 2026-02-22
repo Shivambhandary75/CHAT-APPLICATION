@@ -37,6 +37,13 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 
 	routes.RegisterConversationRoutes(r, conversationController, tokenService)
 
+	// ===== Groups =====
+	groupRepo := repositories.NewGroupRepository(client, dbName)
+	groupService := services.NewGroupService(groupRepo, authRepo)
+	groupController := controllers.NewGroupController(groupService)
+
+	routes.RegisterGroupRoutes(r, groupController, tokenService)
+
 	// ===== Message =====
 	messageRepo := repositories.NewMessageRepository(client, dbName)
 	messageService := services.NewMessageService(messageRepo, conversationRepo)
