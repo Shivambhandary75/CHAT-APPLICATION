@@ -89,3 +89,13 @@ func (c *AuthController) Logout(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "logged out"})
 }
+
+func (c *AuthController) Verify(ctx *gin.Context) {
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"valid": true, "user_id": userID})
+}
