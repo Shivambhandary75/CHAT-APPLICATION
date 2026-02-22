@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/auth/login`,
     LOGOUT: `${API_BASE_URL}/auth/logout`,
     VERIFY: `${API_BASE_URL}/auth/verify`,
+    PROFILE: `${API_BASE_URL}/auth/profile`,
   },
   FRIENDS: {
     SEND_REQUEST: `${API_BASE_URL}/api/friends/request`,

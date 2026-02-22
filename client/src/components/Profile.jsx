@@ -1,9 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Camera, Save, User } from "lucide-react";
+import { updateProfile } from "../api/auth";
 
 const Profile = ({ profileData, onSave }) => {
-  const [editedProfile, setEditedProfile] = useState({ ...profileData });
+  const [editedProfile, setEditedProfile] = useState({
+    name: "",
+    username: "",
+    photo: null,
+    ...profileData,
+  });
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  useEffect(() => {
+    if (profileData) setEditedProfile({ name: "", username: "", photo: null, ...profileData });
+  }, [profileData]);
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -16,14 +28,24 @@ const Profile = ({ profileData, onSave }) => {
     }
   };
 
-  const handleSave = () => {
-    onSave(editedProfile);
-    setIsEditing(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await updateProfile(editedProfile.name);
+      if (onSave) onSave(editedProfile);
+      setIsEditing(false);
+    } catch (err) {
+      setSaveError(err.message || "Failed to save");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setEditedProfile({ ...profileData });
     setIsEditing(false);
+    setSaveError(null);
   };
 
   return (
@@ -37,6 +59,11 @@ const Profile = ({ profileData, onSave }) => {
       <div className="flex-1 overflow-y-auto p-8 flex items-center justify-center">
         <div className="bg-white border-6 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl p-8">
           <div className="space-y-6">
+            {saveError && (
+              <div className="bg-[var(--color-crazy-pink)] border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <p className="font-black uppercase text-center text-sm">{saveError}</p>
+              </div>
+            )}
             {/* Profile Photo */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
@@ -89,17 +116,20 @@ const Profile = ({ profileData, onSave }) => {
             <div>
               <label className="block font-black text-lg mb-3 uppercase">Username</label>
               {isEditing ? (
-                <div className="flex items-center">
-                  <span className="bg-black text-white border-4 border-r-0 border-black px-4 py-3 font-black text-lg">@</span>
-                  <input
-                    type="text"
-                    value={editedProfile.username}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, username: e.target.value })}
-                    className="flex-1 border-4 border-black px-4 py-3 text-lg font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                    placeholder="username"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  />
-                </div>
+                <>
+                  <div className="flex items-center">
+                    <span className="bg-black text-white border-4 border-r-0 border-black px-4 py-3 font-black text-lg">@</span>
+                    <input
+                      type="text"
+                      value={editedProfile.username || ""}
+                      readOnly
+                      className="flex-1 border-4 border-black px-4 py-3 text-lg font-bold bg-gray-100 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none cursor-not-allowed"
+                      placeholder="username"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    />
+                  </div>
+                  <p className="mt-2 text-sm font-bold text-gray-500">Username cannot be changed</p>
+                </>
               ) : (
                 <div className="w-full border-4 border-black px-4 py-3 text-lg font-black bg-[var(--color-crazy-green)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   @{editedProfile.username}
@@ -120,10 +150,11 @@ const Profile = ({ profileData, onSave }) => {
                 <>
                   <button
                     onClick={handleSave}
-                    className="flex-1 bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-4 text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
+                    disabled={isSaving}
+                    className="flex-1 bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-4 text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <Save size={24} />
-                    SAVE
+                    {isSaving ? "SAVING..." : "SAVE"}
                   </button>
                   <button
                     onClick={handleCancel}

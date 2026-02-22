@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LogOut, User, Camera, Edit2, Save, MessageCircle, Users, UserPlus, FolderPlus, Inbox } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ChatSection from "../components/ChatSection";
@@ -11,7 +11,7 @@ import CreateGroupForm from "../components/CreateGroupForm";
 import GroupSettings from "../components/GroupSettings";
 import Requests from "../components/Requests";
 import CustomAlert from "../components/CustomAlert";
-import { logoutUser } from "../api/auth";
+import { logoutUser, getProfile } from "../api/auth";
 
 const CONTACTS = [
   { id: "1", name: "Glitchy Gab", username: "glitchygab", avatarColor: "bg-[var(--color-crazy-pink)]", status: "online" },
@@ -27,8 +27,8 @@ const Dashboard = () => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: "YOUR NAME",
-    username: "username",
+    name: "",
+    username: "",
     photo: null,
   });
   const [confirmState, setConfirmState] = useState({
@@ -36,6 +36,18 @@ const Dashboard = () => {
     message: "",
     onConfirm: null,
   });
+
+  useEffect(() => {
+    getProfile()
+      .then((data) => {
+        setProfileData({
+          name: data.display_name || "",
+          username: data.username || "",
+          photo: null,
+        });
+      })
+      .catch((err) => console.error("Failed to load profile:", err));
+  }, []);
 
   const handleLogout = () => {
     setConfirmState({

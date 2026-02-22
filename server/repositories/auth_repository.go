@@ -93,3 +93,40 @@ func (r *AuthRepository) FindByUsername(username string) (*models.User, error) {
 
 	return &user, nil
 }
+
+func (r *AuthRepository) FindByID(userID string) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objectID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var user models.User
+	err = r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *AuthRepository) UpdateDisplayName(userID string, displayName string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objectID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": objectID},
+		bson.M{"$set": bson.M{"display_name": displayName}},
+	)
+	return err
+}
