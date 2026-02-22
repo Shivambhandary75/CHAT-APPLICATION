@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Camera, Save, User } from "lucide-react";
+import { updateProfile } from "../api/auth";
 
 const Profile = ({ profileData, onSave }) => {
   const [editedProfile, setEditedProfile] = useState({
@@ -8,11 +9,13 @@ const Profile = ({ profileData, onSave }) => {
     photo: null,
     ...profileData,
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   useEffect(() => {
     if (profileData) setEditedProfile({ name: "", username: "", photo: null, ...profileData });
   }, [profileData]);
-  const [isEditing, setIsEditing] = useState(false);
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -25,14 +28,24 @@ const Profile = ({ profileData, onSave }) => {
     }
   };
 
-  const handleSave = () => {
-    onSave(editedProfile);
-    setIsEditing(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await updateProfile(editedProfile.name);
+      if (onSave) onSave(editedProfile);
+      setIsEditing(false);
+    } catch (err) {
+      setSaveError(err.message || "Failed to save");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setEditedProfile({ ...profileData });
     setIsEditing(false);
+    setSaveError(null);
   };
 
   return (
@@ -46,6 +59,11 @@ const Profile = ({ profileData, onSave }) => {
       <div className="flex-1 overflow-y-auto p-8 flex items-center justify-center">
         <div className="bg-white border-6 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl p-8">
           <div className="space-y-6">
+            {saveError && (
+              <div className="bg-[var(--color-crazy-pink)] border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <p className="font-black uppercase text-center text-sm">{saveError}</p>
+              </div>
+            )}
             {/* Profile Photo */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
@@ -132,10 +150,11 @@ const Profile = ({ profileData, onSave }) => {
                 <>
                   <button
                     onClick={handleSave}
-                    className="flex-1 bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-4 text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
+                    disabled={isSaving}
+                    className="flex-1 bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-4 text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <Save size={24} />
-                    SAVE
+                    {isSaving ? "SAVING..." : "SAVE"}
                   </button>
                   <button
                     onClick={handleCancel}

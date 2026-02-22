@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Camera, Save, User } from "lucide-react";
+import { updateProfile } from "../api/auth";
 
 const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
   const [editedProfile, setEditedProfile] = useState({
@@ -8,9 +9,14 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
     photo: null,
     ...profileData,
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    if (isOpen) setEditedProfile({ name: "", username: "", photo: null, ...profileData });
+    if (isOpen) {
+      setEditedProfile({ name: "", username: "", photo: null, ...profileData });
+      setSaveError("");
+    }
   }, [isOpen, profileData]);
 
   if (!isOpen) return null;
@@ -26,9 +32,18 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
     }
   };
 
-  const handleSave = () => {
-    onSave(editedProfile);
-    onClose();
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      await updateProfile(editedProfile.name);
+      onSave(editedProfile);
+      onClose();
+    } catch (err) {
+      setSaveError(err.message || "Failed to save. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleClose = () => {
@@ -52,6 +67,11 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
 
         {/* Content */}
         <div className="p-6 space-y-6">
+          {saveError && (
+            <div className="bg-[var(--color-crazy-pink)] border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <p className="font-black uppercase text-center text-sm">{saveError}</p>
+            </div>
+          )}
           {/* Profile Photo */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
@@ -113,10 +133,11 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
           <div className="flex gap-3">
             <button
               onClick={handleSave}
-              className="flex-1 bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2"
+              disabled={isSaving}
+              className="flex-1 bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Save size={20} />
-              SAVE
+              {isSaving ? "SAVING..." : "SAVE"}
             </button>
             <button
               onClick={handleClose}
