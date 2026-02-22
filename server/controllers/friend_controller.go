@@ -28,7 +28,7 @@ func (c *FriendController) SendRequest(ctx *gin.Context) {
 	}
 
 	// Get current user ID from context (set by auth middleware)
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -72,7 +72,7 @@ func (c *FriendController) AcceptRequest(ctx *gin.Context) {
 		return
 	}
 
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -112,7 +112,7 @@ func (c *FriendController) RejectRequest(ctx *gin.Context) {
 		return
 	}
 
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -152,7 +152,7 @@ func (c *FriendController) CancelRequest(ctx *gin.Context) {
 		return
 	}
 
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -184,7 +184,7 @@ func (c *FriendController) CancelRequest(ctx *gin.Context) {
 
 // Get received requests
 func (c *FriendController) GetReceivedRequests(ctx *gin.Context) {
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -207,7 +207,7 @@ func (c *FriendController) GetReceivedRequests(ctx *gin.Context) {
 
 // Get sent requests
 func (c *FriendController) GetSentRequests(ctx *gin.Context) {
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -230,7 +230,7 @@ func (c *FriendController) GetSentRequests(ctx *gin.Context) {
 
 // Get friends list
 func (c *FriendController) GetFriends(ctx *gin.Context) {
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -259,7 +259,7 @@ func (c *FriendController) SearchUsers(ctx *gin.Context) {
 		return
 	}
 
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -291,7 +291,7 @@ func (c *FriendController) RemoveFriend(ctx *gin.Context) {
 		return
 	}
 
-	userIDStr, exists := ctx.Get("userID")
+	userIDStr, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
