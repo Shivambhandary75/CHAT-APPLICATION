@@ -63,13 +63,13 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := c.service.Login(body.Email, body.Password)
+	token, userID, err := c.service.Login(body.Email, body.Password)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+	ctx.JSON(http.StatusOK, gin.H{"token": token, "user_id": userID})
 }
 
 func (c *AuthController) Logout(ctx *gin.Context) {

@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthRoute from "./components/AuthRoute";
+import ChatPage from "./features/chat/pages/ChatPage";
 
 export function App() {
   return (
@@ -36,6 +37,8 @@ export function App() {
         } 
       />
       <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Temporary Chat Testing Route */}
+      <Route path="/chat-test" element={<ChatPage />} />
     </Routes>
   );
 }

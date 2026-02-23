@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/ws"
 )
@@ -56,6 +57,7 @@ func (s *WSService) HandleMessage(senderID string, raw []byte) {
 			"conversation_id": msg.ConversationID,
 			"sender_id":       senderID,
 			"content":         msg.Content,
+			"created_at":      time.Now().UTC().Format(time.RFC3339),
 		}
 
 		data, _ := json.Marshal(payload)

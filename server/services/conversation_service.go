@@ -46,7 +46,16 @@ func (s *ConversationService) CreateDirectConversation(user1, user2 string) (*mo
 }
 
 func (s *ConversationService) GetUserConversations(userID string) ([]models.Conversation, error) {
-	return s.repo.FindByUser(userID)
+	conversations, err := s.repo.FindByUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	
+	if conversations == nil {
+		conversations = []models.Conversation{}
+	}
+	
+	return conversations, nil
 }
 
 func (s *ConversationService) GetParticipants(conversationID string) ([]string, error) {
