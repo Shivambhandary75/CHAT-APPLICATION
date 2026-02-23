@@ -5,7 +5,7 @@ import { MessageCircle, Search } from "lucide-react";
 import { useChatStore } from "../features/chat/store/ChatStore";
 import chatService from "../features/chat/services/ChatService";
 
-const ChatList = () => {
+const ChatList = ({ onSelectChat }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const conversations = useChatStore((s) => s.conversations);
@@ -15,7 +15,7 @@ const ChatList = () => {
   const setMessages = useChatStore((s) => s.setMessages);
 
   const handleSelect = async (conversation) => {
-    const conversationId = conversation._id || conversation.ID;
+    const conversationId = conversation.id || conversation._id || conversation.ID;
 
     setSelectedConversation(conversation);
 
@@ -25,14 +25,17 @@ const ChatList = () => {
     } catch (err) {
       console.error("Failed to load messages:", err);
     }
+
+    if (onSelectChat) onSelectChat(conversation);
   };
 
   const filteredConversations = conversations.filter((conv) => {
     const name =
-      conv.display_name ||
       conv.name ||
+      conv.display_name ||
       conv.ID ||
       conv._id ||
+      conv.id ||
       "";
 
     return name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -81,14 +84,20 @@ const ChatList = () => {
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative">
                     <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm">
-                      {/* {name.substring(0, 2).toUpperCase()} */}
+                      {name?.substring(0, 2).toUpperCase() || "??"}
                     </div>
                   </div>
                   <div className="flex-1">
                     <h3 className="font-black text-lg">{name}</h3>
-                    <p className="font-bold text-xs mt-1 truncate">
-                      ID: {conversationId}
-                    </p>
+                    {conv.last_message ? (
+                      <p className="font-bold text-xs mt-1 truncate opacity-70">
+                        {conv.last_message.content}
+                      </p>
+                    ) : (
+                      <p className="font-bold text-xs mt-1 truncate opacity-50">
+                        No messages yet
+                      </p>
+                    )}
                   </div>
                 </div>
                 <MessageCircle size={20} />

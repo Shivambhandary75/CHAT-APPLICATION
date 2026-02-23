@@ -176,7 +176,7 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col h-full">
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-          {activeView === "chatList" && <ChatList onSelectChat={handleSelectContact} />}
+          {activeView === "chatList" && <ChatList onSelectChat={() => setActiveView("chat")} />}
           {activeView === "chat" && <ChatSection activeContact={activeContact} onBack={handleBackToChat} />}
           {activeView === "friends" && <Friends onSelectFriend={handleSelectContact} showAddSection={false} />}
           {activeView === "requests" && <Requests />}
