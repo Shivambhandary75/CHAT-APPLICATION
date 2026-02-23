@@ -34,7 +34,17 @@ const chatService = {
         const conversation = data.conversation || data;
 
         return {
-            id: conversation.ID,
+            id: conversation.ID || conversation.id || conversation._id,
+            ...conversation,
+        };
+    },
+
+    async getOrCreateGroupConversation(groupId) {
+        const res = await http.get(`/groups/${groupId}/conversation`);
+        const conversation = res.data;
+
+        return {
+            id: conversation.id || conversation.ID || conversation._id,
             ...conversation,
         };
     },

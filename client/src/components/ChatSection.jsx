@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, Smile } from "lucide-react";
+import EmojiPicker from "emoji-picker-react";
 
 import { useChatStore } from "../features/chat/store/ChatStore";
 import { socketClient } from "../core/socket/socketClient";
@@ -30,9 +31,21 @@ const ChatSection = ({ onBack }) => {
     messages[conversationId] || [];
 
   const [inputValue, setInputValue] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
+  const emojiRef = useRef(null);
 
   const currentUserId = localStorage.getItem("user_id");
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (emojiRef.current && !emojiRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -90,7 +103,8 @@ const ChatSection = ({ onBack }) => {
           )}
 
           <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm">
-            {(selectedConversation.display_name ||
+            {(selectedConversation.name ||
+              selectedConversation.display_name ||
               selectedConversation.username ||
               "??"
             )
@@ -100,7 +114,8 @@ const ChatSection = ({ onBack }) => {
 
           <div>
             <h2 className="font-black text-xl uppercase">
-              {selectedConversation.display_name ||
+              {selectedConversation.name ||
+                selectedConversation.display_name ||
                 selectedConversation.username}
             </h2>
           </div>
@@ -144,9 +159,28 @@ const ChatSection = ({ onBack }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* INPUT */}
       <div className="border-t-4 border-black p-4 bg-[var(--color-crazy-green)]">
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative">
+          <div className="relative" ref={emojiRef}>
+            <button
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="bg-white border-4 border-black p-3 h-full"
+            >
+              <Smile size={24} />
+            </button>
+            {showEmojiPicker && (
+              <div className="absolute bottom-full left-0 mb-2 z-50">
+                <EmojiPicker
+                  onEmojiClick={(emojiData) => {
+                    setInputValue((prev) => prev + emojiData.emoji);
+                    setShowEmojiPicker(false);
+                  }}
+                  width={320}
+                  height={400}
+                />
+              </div>
+            )}
+          </div>
           <input
             type="text"
             value={inputValue}

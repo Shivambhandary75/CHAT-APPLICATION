@@ -3,6 +3,8 @@ import { Users, MessageCircle, LogOut, Settings, Search, Loader, X, UserPlus } f
 import CustomAlert from "./CustomAlert";
 import { createGroup, getUserGroups, leaveGroup } from "../api/groups";
 import { getFriends } from "../api/friends";
+import chatService from "../features/chat/services/ChatService";
+import { useChatStore } from "../features/chat/store/ChatStore";
 
 // Map index to a cycling avatar color
 const AVATAR_COLORS = [
@@ -20,7 +22,7 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) =>
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
-  const [selectedMembers, setSelectedMembers] = useState([]); // [{id,username,display_name}]
+  const [selectedMembers, setSelectedMembers] = useState([]);
   const [friends, setFriends] = useState([]);
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [memberSearch, setMemberSearch] = useState("");
@@ -31,6 +33,9 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) =>
     message: "",
     onConfirm: null,
   });
+
+  const setSelectedConversation = useChatStore((s) => s.setSelectedConversation);
+  const setMessages = useChatStore((s) => s.setMessages);
 
   // Fetch groups on mount
   useEffect(() => {
@@ -219,10 +224,10 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) =>
                         <Loader size={16} className="animate-spin" />
                       </div>
                     ) : friends.filter((f) =>
-                        (f.display_name || f.username)
-                          .toLowerCase()
-                          .includes(memberSearch.toLowerCase())
-                      ).length === 0 ? (
+                      (f.display_name || f.username)
+                        .toLowerCase()
+                        .includes(memberSearch.toLowerCase())
+                    ).length === 0 ? (
                       <p className="font-bold text-xs text-center py-3 text-gray-500 uppercase">
                         {friends.length === 0 ? "No friends yet" : "No match"}
                       </p>
@@ -239,9 +244,8 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) =>
                             <button
                               key={friend.id}
                               onClick={() => toggleMember(friend)}
-                              className={`w-full flex items-center gap-2 px-3 py-2 font-bold text-sm text-left border-b border-gray-200 last:border-0 transition-colors ${
-                                isSelected ? "bg-[var(--color-crazy-green)]" : "hover:bg-gray-50"
-                              }`}
+                              className={`w-full flex items-center gap-2 px-3 py-2 font-bold text-sm text-left border-b border-gray-200 last:border-0 transition-colors ${isSelected ? "bg-[var(--color-crazy-green)]" : "hover:bg-gray-50"
+                                }`}
                             >
                               <div className="w-6 h-6 bg-[var(--color-crazy-yellow)] border-2 border-black rounded-full flex items-center justify-center flex-shrink-0">
                                 <span className="text-xs font-black">
@@ -360,7 +364,22 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) =>
                 </div>
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => onSelectGroup && onSelectGroup(group)}
+                    onClick={async () => {
+                      try {
+                        const conversation = await chatService.getOrCreateGroupConversation(group.id);
+                        conversation.display_name = group.name;
+                        conversation.name = group.name;
+                        setSelectedConversation(conversation);
+
+                        const conversationId = conversation.id;
+                        const msgs = await chatService.fetchMessages(conversationId);
+                        setMessages(conversationId, msgs);
+
+                        if (onSelectGroup) onSelectGroup(group);
+                      } catch (err) {
+                        console.error("Failed to open group chat:", err);
+                      }
+                    }}
                     className="bg-[var(--color-crazy-green)] border-3 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all active:translate-x-[2px] active:translate-y-[2px]"
                   >
                     <MessageCircle size={18} />
