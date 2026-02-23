@@ -3,16 +3,18 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/models"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
 	"github.com/gin-gonic/gin"
 )
 
 type ConversationController struct {
-	service *services.ConversationService
+	service    *services.ConversationService
+	msgService *services.MessageService
 }
 
-func NewConversationController(service *services.ConversationService) *ConversationController {
-	return &ConversationController{service: service}
+func NewConversationController(service *services.ConversationService, msgService *services.MessageService) *ConversationController {
+	return &ConversationController{service: service, msgService: msgService}
 }
 
 func (c *ConversationController) CreateDirect(ctx *gin.Context) {
@@ -37,6 +39,11 @@ func (c *ConversationController) CreateDirect(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, conversation)
 }
 
+type ConversationWithLastMessage struct {
+	models.Conversation
+	LastMessage *models.Message `json:"last_message,omitempty"`
+}
+
 func (c *ConversationController) GetUserConversations(ctx *gin.Context) {
 
 	userID := ctx.GetString("user_id")
@@ -47,5 +54,14 @@ func (c *ConversationController) GetUserConversations(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, conversations)
+	result := make([]ConversationWithLastMessage, 0, len(conversations))
+	for _, conv := range conversations {
+		enriched := ConversationWithLastMessage{Conversation: conv}
+		convID := conv.ID.Hex()
+		lastMsg, _ := c.msgService.GetLatestMessage(convID)
+		enriched.LastMessage = lastMsg
+		result = append(result, enriched)
+	}
+
+	ctx.JSON(http.StatusOK, result)
 }

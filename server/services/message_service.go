@@ -69,3 +69,11 @@ func (s *MessageService) GetMessages(conversationID string, userID string) ([]mo
 
 	return s.repo.FindByConversation(convID)
 }
+
+func (s *MessageService) GetLatestMessage(conversationID string) (*models.Message, error) {
+	convID, err := bson.ObjectIDFromHex(conversationID)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.FindLatestByConversation(convID)
+}
