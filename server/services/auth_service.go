@@ -48,15 +48,20 @@ func (s *AuthService) Register(username, displayName, email, password string) er
 	return s.repo.Create(user)
 }
 
-func (s *AuthService) Login(email, password string) (string, error) {
+func (s *AuthService) Login(email, password string) (string, string, error) {
 	user, err := s.repo.FindByEmail(email)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return utils.GenerateToken(user.ID.Hex())
+	token, err := utils.GenerateToken(user.ID.Hex())
+	if err != nil {
+		return "", "", err
+	}
+
+	return token, user.ID.Hex(), nil
 }

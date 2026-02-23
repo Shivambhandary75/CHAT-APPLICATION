@@ -12,22 +12,27 @@ import (
 func AuthMiddleware(tokenService *services.TokenService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		authHeader := c.GetHeader("Authorization")
+		var tokenString string
 
-		if authHeader == "" {
+		// Try Authorization header first
+		authHeader := c.GetHeader("Authorization")
+		if authHeader != "" {
+			parts := strings.Split(authHeader, " ")
+			if len(parts) == 2 {
+				tokenString = parts[1]
+			}
+		}
+
+		// If no header, try query param (WebSocket)
+		if tokenString == "" {
+			tokenString = c.Query("token")
+		}
+
+		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
 			c.Abort()
 			return
 		}
-
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token format"})
-			c.Abort()
-			return
-		}
-
-		tokenString := parts[1]
 
 		// Check blacklist
 		revoked, err := tokenService.IsRevoked(tokenString)

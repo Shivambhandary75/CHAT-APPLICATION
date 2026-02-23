@@ -76,9 +76,12 @@ export const loginUser = async (email, password) => {
       throw new Error(data?.error || "invalid credentials");
     }
 
-    // Store token in localStorage
+    // Store token and user_id in localStorage
     if (data.token) {
       localStorage.setItem("authToken", data.token);
+    }
+    if (data.user_id) {
+      localStorage.setItem("user_id", data.user_id);
     }
 
     return data;
@@ -121,8 +124,9 @@ export const logoutUser = async () => {
       throw new Error(data.error || "Logout failed");
     }
 
-    // Clear token from localStorage
+    // Clear token and user_id from localStorage
     localStorage.removeItem("authToken");
+    localStorage.removeItem("user_id");
 
     return data;
   } catch (error) {

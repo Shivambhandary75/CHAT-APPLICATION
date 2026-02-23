@@ -12,6 +12,7 @@ import GroupSettings from "../components/GroupSettings";
 import Requests from "../components/Requests";
 import CustomAlert from "../components/CustomAlert";
 import { logoutUser } from "../api/auth";
+import { useChatInit } from "../features/chat/hooks/useChatInit";
 
 const CONTACTS = [
   { id: "1", name: "Glitchy Gab", username: "glitchygab", avatarColor: "bg-[var(--color-crazy-pink)]", status: "online" },
@@ -37,6 +38,7 @@ const Dashboard = () => {
     onConfirm: null,
   });
 
+  useChatInit()
   const handleLogout = () => {
     setConfirmState({
       isOpen: true,
@@ -77,8 +79,6 @@ const Dashboard = () => {
   };
 
   const handleSaveGroup = (updatedGroup) => {
-    // In a real app, this would update the backend
-    console.log("Group updated:", updatedGroup);
     setShowGroupSettings(false);
   };
 
@@ -102,9 +102,8 @@ const Dashboard = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           <button
             onClick={() => handleMenuClick("chatList")}
-            className={`w-full ${
-              activeView === "chatList" || activeView === "chat" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+            className={`w-full ${activeView === "chatList" || activeView === "chat" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+              } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
             <MessageCircle size={20} />
             CHATS
@@ -112,9 +111,8 @@ const Dashboard = () => {
 
           <button
             onClick={() => handleMenuClick("friends")}
-            className={`w-full ${
-              activeView === "friends" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+            className={`w-full ${activeView === "friends" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+              } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
             <Users size={20} />
             FRIENDS
@@ -122,9 +120,8 @@ const Dashboard = () => {
 
           <button
             onClick={() => handleMenuClick("requests")}
-            className={`w-full ${
-              activeView === "requests" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+            className={`w-full ${activeView === "requests" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+              } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
             <Inbox size={20} />
             REQUESTS
@@ -132,9 +129,8 @@ const Dashboard = () => {
 
           <button
             onClick={() => handleMenuClick("groups")}
-            className={`w-full ${
-              activeView === "groups" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+            className={`w-full ${activeView === "groups" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+              } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
             <FolderPlus size={20} />
             GROUPS
@@ -142,9 +138,8 @@ const Dashboard = () => {
 
           <button
             onClick={() => handleMenuClick("profile")}
-            className={`w-full ${
-              activeView === "profile" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+            className={`w-full ${activeView === "profile" ? "bg-[var(--color-crazy-yellow)]" : "bg-white"
+              } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
             <User size={20} />
             PROFILE
@@ -152,9 +147,8 @@ const Dashboard = () => {
 
           <button
             onClick={() => handleMenuClick("addFriend")}
-            className={`w-full ${
-              activeView === "addFriend" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-green)]"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+            className={`w-full ${activeView === "addFriend" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-green)]"
+              } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
             <UserPlus size={20} />
             ADD FRIEND
@@ -162,9 +156,8 @@ const Dashboard = () => {
 
           <button
             onClick={() => handleMenuClick("createGroup")}
-            className={`w-full ${
-              activeView === "createGroup" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-blue)]"
-            } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
+            className={`w-full ${activeView === "createGroup" ? "bg-[var(--color-crazy-yellow)]" : "bg-[var(--color-crazy-blue)]"
+              } border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left font-black uppercase flex items-center gap-3`}
           >
             <FolderPlus size={20} />
             CREATE GROUP
@@ -200,10 +193,10 @@ const Dashboard = () => {
 
       {/* Group Settings Modal */}
       {showGroupSettings && selectedGroup && (
-        <GroupSettings 
-          group={selectedGroup} 
-          onSave={handleSaveGroup} 
-          onClose={handleCloseGroupSettings} 
+        <GroupSettings
+          group={selectedGroup}
+          onSave={handleSaveGroup}
+          onClose={handleCloseGroupSettings}
         />
       )}
 
