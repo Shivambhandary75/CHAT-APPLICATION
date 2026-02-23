@@ -4,8 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, ArrowLeft, Smile } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
-import { useChatStore } from "../features/chat/store/ChatStore";
-import { socketClient } from "../core/socket/socketClient";
+import { useChatStore } from "../store/ChatStore";
+import { socketClient } from "../../../core/socket/socketClient";
 
 const ChatSection = ({ onBack }) => {
   const selectedConversation = useChatStore(

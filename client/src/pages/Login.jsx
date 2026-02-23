@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../api/auth";
-import CustomAlert from "../components/CustomAlert";
+import { loginUser } from "../features/auth/api/auth";
+import CustomAlert from "../components/ui/CustomAlert";
 import loginImage from "../assets/images/login_image.jpg";
 
 const Login = () => {
@@ -25,7 +25,7 @@ const Login = () => {
 
     try {
       const response = await loginUser(formData.email, formData.password);
-      
+
       setAlertState({
         isOpen: true,
         message: "LOGIN SUCCESSFUL!",
@@ -61,96 +61,96 @@ const Login = () => {
         <div className="max-w-md w-full">
           {/* Login Container */}
           <div className="bg-[var(--color-crazy-pink)] border-[6px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6">
-          {/* Header */}
-          <div className="text-center mb-5">
-            <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight" style={{ fontFamily: "'Betania Patmos In', cursive" }}>
-              YappHere
-            </h1>
-            <div className="h-1 bg-black w-20 mx-auto mb-3"></div>
-            <h2 className="text-xl md:text-2xl font-black uppercase">
-              LOGIN
-            </h2>
-          </div>
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
-            <div>
-              <label className="block font-black text-base mb-1 uppercase">
-                EMAIL
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                placeholder="Enter your email..."
-                required
-                disabled={isLoading}
-                style={{ fontFamily: "var(--font-display)" }}
-              />
+            {/* Header */}
+            <div className="text-center mb-5">
+              <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight" style={{ fontFamily: "'Betania Patmos In', cursive" }}>
+                YappHere
+              </h1>
+              <div className="h-1 bg-black w-20 mx-auto mb-3"></div>
+              <h2 className="text-xl md:text-2xl font-black uppercase">
+                LOGIN
+              </h2>
             </div>
 
-            {/* Password Field */}
-            <div>
-              <label className="block font-black text-base mb-1 uppercase">
-                PASSWORD
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
-                placeholder="Enter your password..."
-                required
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email Field */}
+              <div>
+                <label className="block font-black text-base mb-1 uppercase">
+                  EMAIL
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
+                  placeholder="Enter your email..."
+                  required
+                  disabled={isLoading}
+                  style={{ fontFamily: "var(--font-display)" }}
+                />
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label className="block font-black text-base mb-1 uppercase">
+                  PASSWORD
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full border-4 border-black px-3 py-2 text-base font-bold bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:-translate-y-0.5 focus:-translate-x-0.5 transition-all"
+                  placeholder="Enter your password..."
+                  required
+                  disabled={isLoading}
+                  style={{ fontFamily: "var(--font-display)" }}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
                 disabled={isLoading}
-                style={{ fontFamily: "var(--font-display)" }}
-              />
+                className="w-full bg-[var(--color-crazy-blue)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "LOGGING IN..." : "LOGIN"}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="my-4 flex items-center">
+              <div className="flex-1 h-1 bg-black"></div>
+              <span className="px-3 font-black uppercase text-xs">OR</span>
+              <div className="flex-1 h-1 bg-black"></div>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[var(--color-crazy-blue)] border-4 border-black font-black px-6 py-3 text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "LOGGING IN..." : "LOGIN"}
-            </button>
-          </form>
+            {/* Sign Up Link */}
+            <div className="text-center">
+              <p className="font-bold mb-2 uppercase text-xs">
+                NEW USER?
+              </p>
+              <button
+                onClick={() => navigate("/signup")}
+                className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-2 text-base uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px]"
+              >
+                CREATE ACCOUNT
+              </button>
+            </div>
 
-          {/* Divider */}
-          <div className="my-4 flex items-center">
-            <div className="flex-1 h-1 bg-black"></div>
-            <span className="px-3 font-black uppercase text-xs">OR</span>
-            <div className="flex-1 h-1 bg-black"></div>
-          </div>
-
-          {/* Sign Up Link */}
-          <div className="text-center">
-            <p className="font-bold mb-2 uppercase text-xs">
-              NEW USER?
-            </p>
-            <button
-              onClick={() => navigate("/signup")}
-              className="w-full bg-[var(--color-crazy-green)] border-4 border-black font-black px-6 py-2 text-base uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 transition-all active:translate-x-[2px] active:translate-y-[2px]"
-            >
-              CREATE ACCOUNT
-            </button>
-          </div>
-
-          {/* Back to Home */}
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => navigate("/")}
-              className="font-bold uppercase text-xs hover:underline"
-            >
-              BACK TO HOME
-            </button>
+            {/* Back to Home */}
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => navigate("/")}
+                className="font-bold uppercase text-xs hover:underline"
+              >
+                BACK TO HOME
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Right Side - Image */}
@@ -161,7 +161,7 @@ const Login = () => {
           className="w-full h-full object-cover"
         />
         {/* Gradient Overlay */}
-        <div 
+        <div
           className="absolute inset-0 opacity-40"
           style={{
             background: 'linear-gradient(135deg, #BDE3C3 0%, #A3CCDA 50%, #BDE3C3 100%)'

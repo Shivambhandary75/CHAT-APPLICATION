@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { UserPlus } from "lucide-react";
 import { searchUsers, sendFriendRequest } from "../api/friends";
-import CustomAlert from "./CustomAlert";
+import CustomAlert from "../../../components/ui/CustomAlert";
 
 const AddFriendForm = () => {
   const [newFriendUsername, setNewFriendUsername] = useState("");
@@ -33,7 +33,7 @@ const AddFriendForm = () => {
         console.error("Search error:", error);
         setSearchResults([]);
         setShowSuggestions(false);
-        
+
         // Show alert if unauthorized
         if (error.message.includes("unauthorized") || error.message.includes("401")) {
           setAlertState({
@@ -152,7 +152,7 @@ const AddFriendForm = () => {
                     }}
                   />
                 </div>
-                
+
                 {/* Suggestions Dropdown */}
                 {showSuggestions && (
                   <div className="absolute top-full left-0 right-0 mt-2 border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-h-64 overflow-y-auto z-10">

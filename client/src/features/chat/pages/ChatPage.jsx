@@ -1,5 +1,5 @@
 import { useChatInit } from "../hooks/useChatInit";
-import ChatLayout from "../components/layout/ChatLayout";
+import ChatLayout from "../components/ChatLayout";
 
 function ChatPage() {
     useChatInit();

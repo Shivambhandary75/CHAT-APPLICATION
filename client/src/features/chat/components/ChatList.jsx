@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { MessageCircle, Search } from "lucide-react";
-import { useChatStore } from "../features/chat/store/ChatStore";
-import chatService from "../features/chat/services/ChatService";
+import { useChatStore } from "../store/ChatStore";
+import chatService from "../services/ChatService";
 
 const ChatList = ({ onSelectChat }) => {
   const [searchQuery, setSearchQuery] = useState("");

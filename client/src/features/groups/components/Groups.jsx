@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Users, MessageCircle, LogOut, Settings, Search, Loader, X, UserPlus } from "lucide-react";
-import CustomAlert from "./CustomAlert";
+import CustomAlert from "../../../components/ui/CustomAlert";
 import { createGroup, getUserGroups, leaveGroup } from "../api/groups";
-import { getFriends } from "../api/friends";
-import chatService from "../features/chat/services/ChatService";
-import { useChatStore } from "../features/chat/store/ChatStore";
+import { getFriends } from "../../friends/api/friends";
+import chatService from "../../chat/services/ChatService";
+import { useChatStore } from "../../chat/store/ChatStore";
 
 // Map index to a cycling avatar color
 const AVATAR_COLORS = [

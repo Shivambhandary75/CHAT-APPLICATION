@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "./config";
+import { API_ENDPOINTS } from "../../../api/config";
 
 // Helper to get auth token
 const getAuthHeader = () => {
