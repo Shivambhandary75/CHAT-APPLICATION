@@ -113,3 +113,34 @@ func (r *ConversationRepository) GetParticipants(conversationID string) ([]strin
 
 	return conversation.Participants, nil
 }
+
+func (r *ConversationRepository) FindByGroupID(groupID string) (*models.Conversation, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var conversation models.Conversation
+	err := r.collection.FindOne(ctx, bson.M{
+		"type":     "group",
+		"group_id": groupID,
+	}).Decode(&conversation)
+
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &conversation, nil
+}
+
+func (r *ConversationRepository) UpdateParticipants(conversationID bson.ObjectID, participants []string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := r.collection.UpdateOne(ctx,
+		bson.M{"_id": conversationID},
+		bson.M{"$set": bson.M{"participants": participants}},
+	)
+	return err
+}

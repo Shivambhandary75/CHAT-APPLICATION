@@ -19,6 +19,7 @@ func RegisterGroupRoutes(
 		g.GET("", controller.GetUserGroups)
 		g.GET("/:id", controller.GetGroupByID)
 		g.GET("/:id/members", controller.GetGroupMembers)
+		g.GET("/:id/conversation", controller.GetGroupConversation)
 		g.PUT("/:id", controller.UpdateGroup)
 		g.DELETE("/:id/leave", controller.LeaveGroup)
 	}

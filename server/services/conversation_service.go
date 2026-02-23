@@ -7,6 +7,7 @@ import (
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/models"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/repositories"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type ConversationService struct {
@@ -60,4 +61,36 @@ func (s *ConversationService) GetUserConversations(userID string) ([]models.Conv
 
 func (s *ConversationService) GetParticipants(conversationID string) ([]string, error) {
 	return s.repo.GetParticipants(conversationID)
+}
+
+func (s *ConversationService) CreateGroupConversation(groupID string, name string, members []string) (*models.Conversation, error) {
+	existing, err := s.repo.FindByGroupID(groupID)
+	if err != nil {
+		return nil, err
+	}
+	if existing != nil {
+		return existing, nil
+	}
+
+	conversation := models.Conversation{
+		Type:         "group",
+		Name:         name,
+		GroupID:      groupID,
+		Participants: members,
+		CreatedAt:    time.Now(),
+	}
+
+	return s.repo.Create(conversation)
+}
+
+func (s *ConversationService) GetOrCreateGroupConversation(groupID string, name string, members []string) (*models.Conversation, error) {
+	return s.CreateGroupConversation(groupID, name, members)
+}
+
+func (s *ConversationService) UpdateConversationParticipants(conversationID string, participants []string) error {
+	objID, err := bson.ObjectIDFromHex(conversationID)
+	if err != nil {
+		return err
+	}
+	return s.repo.UpdateParticipants(objID, participants)
 }

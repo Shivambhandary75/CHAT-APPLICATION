@@ -10,12 +10,13 @@ import (
 )
 
 type GroupService struct {
-	repo     *repositories.GroupRepository
-	authRepo *repositories.AuthRepository
+	repo            *repositories.GroupRepository
+	authRepo        *repositories.AuthRepository
+	convService     *ConversationService
 }
 
-func NewGroupService(repo *repositories.GroupRepository, authRepo *repositories.AuthRepository) *GroupService {
-	return &GroupService{repo: repo, authRepo: authRepo}
+func NewGroupService(repo *repositories.GroupRepository, authRepo *repositories.AuthRepository, convService *ConversationService) *GroupService {
+	return &GroupService{repo: repo, authRepo: authRepo, convService: convService}
 }
 
 func (s *GroupService) CreateGroup(creatorID, name, description, avatarColor string, memberIDs []string) (*models.Group, error) {
@@ -45,6 +46,14 @@ func (s *GroupService) CreateGroup(creatorID, name, description, avatarColor str
 	return s.repo.Create(g)
 }
 
+func (s *GroupService) GetGroupConversation(groupID string) (*models.Conversation, error) {
+	group, err := s.repo.FindByID(groupID)
+	if err != nil {
+		return nil, err
+	}
+	return s.convService.GetOrCreateGroupConversation(groupID, group.Name, group.Members)
+}
+
 func (s *GroupService) GetUserGroups(userID string) ([]models.Group, error) {
 	return s.repo.FindByMember(userID)
 }
@@ -72,7 +81,19 @@ func (s *GroupService) UpdateGroup(groupID, name, description, photo, avatarColo
 }
 
 func (s *GroupService) LeaveGroup(groupID, userID string) error {
-	return s.repo.RemoveMember(groupID, userID)
+	err := s.repo.RemoveMember(groupID, userID)
+	if err != nil {
+		return err
+	}
+	// Sync conversation participants
+	group, err := s.repo.FindByID(groupID)
+	if err == nil && group != nil {
+		conv, convErr := s.convService.GetOrCreateGroupConversation(groupID, group.Name, group.Members)
+		if convErr == nil && conv != nil {
+			s.convService.UpdateConversationParticipants(conv.ID.Hex(), group.Members)
+		}
+	}
+	return nil
 }
 
 func (s *GroupService) GetGroupMembers(groupID string) ([]models.FriendResponse, error) {

@@ -115,3 +115,12 @@ func (c *GroupController) GetGroupMembers(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, members)
 }
+
+func (c *GroupController) GetGroupConversation(ctx *gin.Context) {
+	conversation, err := c.service.GetGroupConversation(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get group conversation"})
+		return
+	}
+	ctx.JSON(http.StatusOK, conversation)
+}

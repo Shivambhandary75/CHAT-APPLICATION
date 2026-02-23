@@ -33,23 +33,24 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 	// ===== Conversation =====
 	conversationRepo := repositories.NewConversationRepository(client, dbName)
 	conversationService := services.NewConversationService(conversationRepo)
-	conversationController := controllers.NewConversationController(conversationService)
-
-	routes.RegisterConversationRoutes(r, conversationController, tokenService)
-
-	// ===== Groups =====
-	groupRepo := repositories.NewGroupRepository(client, dbName)
-	groupService := services.NewGroupService(groupRepo, authRepo)
-	groupController := controllers.NewGroupController(groupService)
-
-	routes.RegisterGroupRoutes(r, groupController, tokenService)
 
 	// ===== Message =====
 	messageRepo := repositories.NewMessageRepository(client, dbName)
 	messageService := services.NewMessageService(messageRepo, conversationRepo)
 	messageController := controllers.NewMessageController(messageService)
 
+	// ===== Conversation Controller (needs messageService for last_message) =====
+	conversationController := controllers.NewConversationController(conversationService, messageService)
+
+	routes.RegisterConversationRoutes(r, conversationController, tokenService)
 	routes.RegisterMessageRoutes(r, messageController, tokenService)
+
+	// ===== Groups =====
+	groupRepo := repositories.NewGroupRepository(client, dbName)
+	groupService := services.NewGroupService(groupRepo, authRepo, conversationService)
+	groupController := controllers.NewGroupController(groupService)
+
+	routes.RegisterGroupRoutes(r, groupController, tokenService)
 
 	// ===== Friend Module =====
 	friendRepo := repositories.NewFriendRepository(client, dbName)
