@@ -67,4 +67,9 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudin
 	wsController := controllers.NewWSController(hub, wsService)
 
 	routes.RegisterWSRoutes(r, wsController, tokenService)
+	// ===== Stats Module =====
+	statsRepo := repositories.NewStatsRepository(client, dbName)
+	statsService := services.NewStatsService(statsRepo)
+	statsController := controllers.NewStatsController(statsService)
+	routes.RegisterStatsRoutes(r, statsController)
 }

@@ -31,6 +31,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `${API_BASE_URL}/groups/${id}`,
     LEAVE: (id) => `${API_BASE_URL}/groups/${id}/leave`,
   },
+  STATS: {
+    STREAM: `${API_BASE_URL}/api/stats/stream`,
+  },
 };
 
 export default API_BASE_URL;
