@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "./config";
+import { API_ENDPOINTS } from "../../../api/config";
 
 // Register a new user
 export const registerUser = async (

@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { UserPlus, MessageCircle, UserMinus, Search } from "lucide-react";
 import { getFriends, sendFriendRequest, removeFriend } from "../api/friends";
-import CustomAlert from "./CustomAlert";
-import chatService from "../features/chat/services/ChatService";
-import { useChatStore } from "../features/chat/store/ChatStore";
+import CustomAlert from "../../../components/ui/CustomAlert";
+import chatService from "../../chat/services/ChatService";
+import { useChatStore } from "../../chat/store/ChatStore";
 
 const Friends = ({ onSelectFriend, showAddSection = true }) => {
 	const [friends, setFriends] = useState([]);

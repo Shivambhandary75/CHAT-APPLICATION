@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { LogOut, User, MessageCircle, Users, UserPlus, FolderPlus, Inbox } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ChatSection from "../components/ChatSection";
-import ChatList from "../components/ChatList";
-import Friends from "../components/Friends";
-import Groups from "../components/Groups";
-import Profile from "../components/Profile";
-import AddFriendForm from "../components/AddFriendForm";
-import GroupSettings from "../components/GroupSettings";
-import Requests from "../components/Requests";
-import CustomAlert from "../components/CustomAlert";
-import { logoutUser, getProfile } from "../api/auth";
+import ChatSection from "../features/chat/components/ChatSection";
+import ChatList from "../features/chat/components/ChatList";
+import Friends from "../features/friends/components/Friends";
+import Groups from "../features/groups/components/Groups";
+import Profile from "../features/auth/components/Profile";
+import AddFriendForm from "../features/friends/components/AddFriendForm";
+import GroupSettings from "../features/groups/components/GroupSettings";
+import Requests from "../features/friends/components/Requests";
+import CustomAlert from "../components/ui/CustomAlert";
+import { logoutUser, getProfile } from "../features/auth/api/auth";
 import { useChatInit } from "../features/chat/hooks/useChatInit";
 
 const Dashboard = () => {

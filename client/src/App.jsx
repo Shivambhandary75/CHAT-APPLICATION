@@ -4,36 +4,36 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
-import AuthRoute from "./components/AuthRoute";
+import ProtectedRoute from "./features/auth/components/ProtectedRoute";
+import AuthRoute from "./features/auth/components/AuthRoute";
 
 export function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route 
-        path="/login" 
+      <Route
+        path="/login"
         element={
           <AuthRoute>
             <Login />
           </AuthRoute>
-        } 
+        }
       />
-      <Route 
-        path="/signup" 
+      <Route
+        path="/signup"
         element={
           <AuthRoute>
             <Signup />
           </AuthRoute>
-        } 
+        }
       />
-      <Route 
-        path="/dashboard" 
+      <Route
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        } 
+        }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

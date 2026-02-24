@@ -7,7 +7,7 @@ import {
   rejectFriendRequest,
   cancelFriendRequest,
 } from "../api/friends";
-import CustomAlert from "./CustomAlert";
+import CustomAlert from "../../../components/ui/CustomAlert";
 
 const Requests = () => {
   const [activeTab, setActiveTab] = useState("received"); // "sent" or "received"
@@ -166,18 +166,16 @@ const Requests = () => {
       <div className="border-b-4 border-black bg-white flex">
         <button
           onClick={() => setActiveTab("received")}
-          className={`flex-1 ${
-            activeTab === "received" ? "bg-[var(--color-crazy-pink)]" : "bg-white"
-          } border-r-4 border-black p-4 font-black uppercase flex items-center justify-center gap-2 hover:bg-[var(--color-crazy-pink)] transition-all`}
+          className={`flex-1 ${activeTab === "received" ? "bg-[var(--color-crazy-pink)]" : "bg-white"
+            } border-r-4 border-black p-4 font-black uppercase flex items-center justify-center gap-2 hover:bg-[var(--color-crazy-pink)] transition-all`}
         >
           <Inbox size={20} />
           RECEIVED ({receivedRequests.length})
         </button>
         <button
           onClick={() => setActiveTab("sent")}
-          className={`flex-1 ${
-            activeTab === "sent" ? "bg-[var(--color-crazy-green)]" : "bg-white"
-          } p-4 font-black uppercase flex items-center justify-center gap-2 hover:bg-[var(--color-crazy-green)] transition-all`}
+          className={`flex-1 ${activeTab === "sent" ? "bg-[var(--color-crazy-green)]" : "bg-white"
+            } p-4 font-black uppercase flex items-center justify-center gap-2 hover:bg-[var(--color-crazy-green)] transition-all`}
         >
           <Send size={20} />
           SENT ({sentRequests.length})
@@ -296,7 +294,7 @@ const Requests = () => {
       {/* Footer */}
       <div className="bg-white border-t-4 border-black p-4">
         <p className="font-bold text-center uppercase text-sm">
-          {activeTab === "received" 
+          {activeTab === "received"
             ? `SHOWING: ${receivedRequests.length} RECEIVED REQUEST${receivedRequests.length !== 1 ? 'S' : ''}`
             : `SHOWING: ${sentRequests.length} SENT REQUEST${sentRequests.length !== 1 ? 'S' : ''}`
           }

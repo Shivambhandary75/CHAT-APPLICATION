@@ -19,11 +19,11 @@ const ProtectedRoute = ({ children }) => {
   if (isVerifying) {
     // Show loading state while verifying
     return (
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "center", 
-        alignItems: "center", 
-        height: "100vh" 
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh"
       }}>
         <p>Verifying...</p>
       </div>

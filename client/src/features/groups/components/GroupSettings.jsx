@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Users, Camera, UserPlus, X, Save, Loader, Search } from "lucide-react";
-import CustomAlert from "./CustomAlert";
+import CustomAlert from "../../../components/ui/CustomAlert";
 import { updateGroup, getGroupMembers } from "../api/groups";
-import { getFriends } from "../api/friends";
+import { getFriends } from "../../friends/api/friends";
 
 const AVATAR_COLORS = [
   "bg-[var(--color-crazy-pink)]",

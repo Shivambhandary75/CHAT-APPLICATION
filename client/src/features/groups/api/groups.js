@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "./config";
+import { API_ENDPOINTS } from "../../../api/config";
 
 const getAuthHeader = () => {
   const token = localStorage.getItem("authToken");
