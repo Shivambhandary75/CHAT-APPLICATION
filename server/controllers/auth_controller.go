@@ -10,9 +10,9 @@ import (
 )
 
 type AuthController struct {
-	service        *services.AuthService
-	tokenService   *services.TokenService
-	cloudinaryURL  string
+	service       *services.AuthService
+	tokenService  *services.TokenService
+	cloudinaryURL string
 }
 
 func NewAuthController(
