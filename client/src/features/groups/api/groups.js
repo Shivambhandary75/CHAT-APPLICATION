@@ -57,21 +57,28 @@ export const getGroupByID = async (groupId) => {
   return parseResponse(response);
 };
 
-// Update group settings (name, description, photo, members)
+// Update group settings (name, description, photo file, members)
+// photoFile is an optional File object; if omitted the existing photo is kept.
 export const updateGroup = async (
   groupId,
-  { name, description, photo, avatarColor, memberIds },
+  { name, description, photoFile, avatarColor, memberIds },
 ) => {
+  const token = localStorage.getItem("authToken");
+
+  const formData = new FormData();
+  if (name) formData.append("name", name);
+  if (description !== undefined) formData.append("description", description);
+  if (avatarColor) formData.append("avatar_color", avatarColor);
+  if (memberIds) formData.append("member_ids", JSON.stringify(memberIds));
+  if (photoFile) formData.append("photo", photoFile);
+
   const response = await fetch(API_ENDPOINTS.GROUPS.BY_ID(groupId), {
     method: "PUT",
-    headers: getAuthHeader(),
-    body: JSON.stringify({
-      name: name || "",
-      description: description || "",
-      photo: photo || "",
-      avatar_color: avatarColor || "",
-      member_ids: memberIds || null,
-    }),
+    headers: {
+      // Do NOT set Content-Type – browser adds the multipart boundary automatically
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
   });
   return parseResponse(response);
 };

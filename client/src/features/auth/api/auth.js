@@ -197,21 +197,26 @@ export const getProfile = async () => {
   return data;
 };
 
-// Update user display name
-export const updateProfile = async (displayName) => {
+// Update user display name and/or profile photo.
+// photoFile is an optional File object.
+export const updateProfile = async (displayName, photoFile = null) => {
   const token = localStorage.getItem("authToken");
   if (!token) throw new Error("Not authenticated");
+
+  const formData = new FormData();
+  if (displayName) formData.append("display_name", displayName);
+  if (photoFile) formData.append("photo", photoFile);
 
   const response = await fetch(API_ENDPOINTS.AUTH.PROFILE, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
+      // Do NOT set Content-Type – browser sets it with boundary for FormData
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ display_name: displayName }),
+    body: formData,
   });
 
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Failed to update profile");
-  return data;
+  return data; // { status, photo_url }
 };

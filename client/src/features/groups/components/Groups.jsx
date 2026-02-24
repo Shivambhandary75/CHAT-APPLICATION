@@ -14,7 +14,7 @@ const AVATAR_COLORS = [
   "bg-[var(--color-crazy-yellow)]",
 ];
 
-const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) => {
+const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings, updatedGroup }) => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,6 +52,14 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings }) =>
     };
     fetchGroups();
   }, []);
+
+  // Reflect group updates (e.g. photo changes) from GroupSettings immediately
+  useEffect(() => {
+    if (!updatedGroup?.id) return;
+    setGroups((prev) =>
+      prev.map((g) => (g.id === updatedGroup.id ? { ...g, ...updatedGroup } : g))
+    );
+  }, [updatedGroup]);
 
   const filteredGroups = groups.filter((group) =>
     group.name?.toLowerCase().includes(searchQuery.toLowerCase())

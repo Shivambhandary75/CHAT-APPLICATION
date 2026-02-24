@@ -21,7 +21,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudin
 	// ===== Auth =====
 	authRepo := repositories.NewAuthRepository(client, dbName)
 	authService := services.NewAuthService(authRepo)
-	authController := controllers.NewAuthController(authService, tokenService)
+	authController := controllers.NewAuthController(authService, tokenService, cloudinaryURL)
 
 	routes.RegisterAuthRoutes(r, authController, tokenService)
 
@@ -48,7 +48,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudin
 	// ===== Groups =====
 	groupRepo := repositories.NewGroupRepository(client, dbName)
 	groupService := services.NewGroupService(groupRepo, authRepo, conversationService)
-	groupController := controllers.NewGroupController(groupService)
+	groupController := controllers.NewGroupController(groupService, cloudinaryURL)
 
 	routes.RegisterGroupRoutes(r, groupController, tokenService)
 

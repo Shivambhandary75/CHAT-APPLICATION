@@ -73,9 +73,9 @@ func (s *AuthService) GetProfile(userID string) (*models.User, error) {
 	return s.repo.FindByID(userID)
 }
 
-func (s *AuthService) UpdateProfile(userID string, displayName string) error {
-	if displayName == "" {
-		return fmt.Errorf("display name cannot be empty")
+func (s *AuthService) UpdateProfile(userID string, displayName string, photoURL string) error {
+	if displayName == "" && photoURL == "" {
+		return fmt.Errorf("nothing to update")
 	}
-	return s.repo.UpdateDisplayName(userID, displayName)
+	return s.repo.UpdateProfile(userID, displayName, photoURL)
 }

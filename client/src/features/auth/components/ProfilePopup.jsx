@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Camera, Save, User } from "lucide-react";
 import { updateProfile } from "../api/auth";
 
@@ -11,33 +11,54 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [previewURL, setPreviewURL] = useState(null);
+  const prevPreviewRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
       setEditedProfile({ name: "", username: "", photo: null, ...profileData });
       setSaveError("");
+      setPhotoFile(null);
+      if (previewURL) URL.revokeObjectURL(previewURL);
+      setPreviewURL(null);
+      prevPreviewRef.current = null;
     }
   }, [isOpen, profileData]);
+
+  useEffect(() => {
+    return () => {
+      if (prevPreviewRef.current) URL.revokeObjectURL(prevPreviewRef.current);
+    };
+  }, []);
 
   if (!isOpen) return null;
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditedProfile({ ...editedProfile, photo: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    if (previewURL) URL.revokeObjectURL(previewURL);
+    const url = URL.createObjectURL(file);
+    prevPreviewRef.current = url;
+    setPhotoFile(file);
+    setPreviewURL(url);
   };
+
+  const displayPhoto = previewURL || editedProfile.photo || null;
 
   const handleSave = async () => {
     setIsSaving(true);
     setSaveError("");
     try {
-      await updateProfile(editedProfile.name);
-      onSave(editedProfile);
+      const result = await updateProfile(editedProfile.name, photoFile || undefined);
+      const updatedPhoto = result?.photo_url || editedProfile.photo;
+      const updated = { ...editedProfile, photo: updatedPhoto };
+      setEditedProfile(updated);
+      setPhotoFile(null);
+      if (previewURL) URL.revokeObjectURL(previewURL);
+      setPreviewURL(null);
+      prevPreviewRef.current = null;
+      onSave(updated);
       onClose();
     } catch (err) {
       setSaveError(err.message || "Failed to save. Please try again.");
@@ -48,6 +69,10 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
 
   const handleClose = () => {
     setEditedProfile({ ...profileData });
+    setPhotoFile(null);
+    if (previewURL) URL.revokeObjectURL(previewURL);
+    setPreviewURL(null);
+    prevPreviewRef.current = null;
     onClose();
   };
 
@@ -75,9 +100,9 @@ const ProfilePopup = ({ isOpen, onClose, profileData, onSave }) => {
           {/* Profile Photo */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              {editedProfile.photo ? (
+              {displayPhoto ? (
                 <img
-                  src={editedProfile.photo}
+                  src={displayPhoto}
                   alt="Profile"
                   className="w-24 h-24 border-6 border-black rounded-full object-cover shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                 />

@@ -160,3 +160,33 @@ func (r *AuthRepository) UpdateDisplayName(userID string, displayName string) er
 	)
 	return err
 }
+
+// UpdateProfile updates display_name and/or photo_url for a user.
+// Only non-empty values are written.
+func (r *AuthRepository) UpdateProfile(userID string, displayName string, photoURL string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objectID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+
+	fields := bson.M{}
+	if displayName != "" {
+		fields["display_name"] = displayName
+	}
+	if photoURL != "" {
+		fields["photo_url"] = photoURL
+	}
+	if len(fields) == 0 {
+		return nil
+	}
+
+	_, err = r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": objectID},
+		bson.M{"$set": fields},
+	)
+	return err
+}

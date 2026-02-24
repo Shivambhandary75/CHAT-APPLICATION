@@ -5,21 +5,25 @@ import (
 	"strings"
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type AuthController struct {
-	service      *services.AuthService
-	tokenService *services.TokenService
+	service        *services.AuthService
+	tokenService   *services.TokenService
+	cloudinaryURL  string
 }
 
 func NewAuthController(
 	service *services.AuthService,
 	tokenService *services.TokenService,
+	cloudinaryURL string,
 ) *AuthController {
 	return &AuthController{
-		service:      service,
-		tokenService: tokenService,
+		service:       service,
+		tokenService:  tokenService,
+		cloudinaryURL: cloudinaryURL,
 	}
 }
 
@@ -119,6 +123,7 @@ func (c *AuthController) GetProfile(ctx *gin.Context) {
 		"username":     user.Username,
 		"display_name": user.DisplayName,
 		"email":        user.Email,
+		"photo_url":    user.PhotoURL,
 	})
 }
 
@@ -129,18 +134,38 @@ func (c *AuthController) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 
-	var body struct {
-		DisplayName string `json:"display_name"`
+	displayName := ctx.PostForm("display_name")
+
+	photoURL := ""
+	header, err := ctx.FormFile("photo")
+	if err == nil && header != nil {
+		file, openErr := header.Open()
+		if openErr != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to open photo"})
+			return
+		}
+		defer file.Close()
+		mimeType := header.Header.Get("Content-Type")
+		if mimeType == "" {
+			mimeType = "image/jpeg"
+		}
+		url, _, uploadErr := utils.UploadFile(c.cloudinaryURL, file, "profile_photos", mimeType)
+		if uploadErr != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload photo"})
+			return
+		}
+		photoURL = url
 	}
-	if err := ctx.ShouldBindJSON(&body); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+
+	if displayName == "" && photoURL == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "nothing to update"})
 		return
 	}
 
-	if err := c.service.UpdateProfile(userID, body.DisplayName); err != nil {
+	if err := c.service.UpdateProfile(userID, displayName, photoURL); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "profile updated"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "profile updated", "photo_url": photoURL})
 }

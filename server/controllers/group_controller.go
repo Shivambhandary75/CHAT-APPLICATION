@@ -1,19 +1,22 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/models"
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/services"
+	"github.com/Shivambhandary75/CHAT-APPLICATION/server/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type GroupController struct {
-	service *services.GroupService
+	service       *services.GroupService
+	cloudinaryURL string
 }
 
-func NewGroupController(service *services.GroupService) *GroupController {
-	return &GroupController{service: service}
+func NewGroupController(service *services.GroupService, cloudinaryURL string) *GroupController {
+	return &GroupController{service: service, cloudinaryURL: cloudinaryURL}
 }
 
 func (c *GroupController) CreateGroup(ctx *gin.Context) {
@@ -77,20 +80,41 @@ func (c *GroupController) GetGroupByID(ctx *gin.Context) {
 }
 
 func (c *GroupController) UpdateGroup(ctx *gin.Context) {
-	var body struct {
-		Name        string   `json:"name"`
-		Description string   `json:"description"`
-		Photo       string   `json:"photo"`
-		AvatarColor string   `json:"avatar_color"`
-		MemberIDs   []string `json:"member_ids"`
+	name := ctx.PostForm("name")
+	description := ctx.PostForm("description")
+	avatarColor := ctx.PostForm("avatar_color")
+
+	var memberIDs []string
+	if raw := ctx.PostForm("member_ids"); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &memberIDs); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid member_ids"})
+			return
+		}
 	}
 
-	if err := ctx.ShouldBindJSON(&body); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
+	// Upload photo to Cloudinary if provided
+	photoURL := ""
+	header, err := ctx.FormFile("photo")
+	if err == nil && header != nil {
+		file, openErr := header.Open()
+		if openErr != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to open photo"})
+			return
+		}
+		defer file.Close()
+		mimeType := header.Header.Get("Content-Type")
+		if mimeType == "" {
+			mimeType = "image/jpeg"
+		}
+		url, _, uploadErr := utils.UploadFile(c.cloudinaryURL, file, "group_photos", mimeType)
+		if uploadErr != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload photo"})
+			return
+		}
+		photoURL = url
 	}
 
-	group, err := c.service.UpdateGroup(ctx.Param("id"), body.Name, body.Description, body.Photo, body.AvatarColor, body.MemberIDs)
+	group, err := c.service.UpdateGroup(ctx.Param("id"), name, description, photoURL, avatarColor, memberIDs)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update group"})
 		return
