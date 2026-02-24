@@ -20,7 +20,7 @@ func Start() {
 	r := routes.SetupRouter(cfg.CorsOrigins)
 
 	// Register all feature modules
-	RegisterModules(r, client, cfg.DBName)
+	RegisterModules(r, client, cfg.DBName, cfg.CloudinaryURL)
 
 	// Serve static files from React build (optional - for production)
 	r.Static("/assets", "../client/dist/assets")

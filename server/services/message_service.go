@@ -24,7 +24,7 @@ func NewMessageService(
 	}
 }
 
-func (s *MessageService) SendMessage(conversationID string, senderID string, content string) error {
+func (s *MessageService) SendMessage(conversationID string, senderID string, content string, attachmentURL string, attachmentType string) error {
 
 	// Convert conversationID
 	convID, err := bson.ObjectIDFromHex(conversationID)
@@ -45,6 +45,8 @@ func (s *MessageService) SendMessage(conversationID string, senderID string, con
 		ConversationID: convID,
 		SenderID:       senderID,
 		Content:        content,
+		AttachmentURL:  attachmentURL,
+		AttachmentType: attachmentType,
 		CreatedAt:      time.Now(),
 	}
 

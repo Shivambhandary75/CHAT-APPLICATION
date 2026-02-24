@@ -12,7 +12,7 @@ import (
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/ws"
 )
 
-func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
+func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudinaryURL string) {
 
 	// ===== Token =====
 	tokenRepo := repositories.NewTokenRepository(client, dbName)
@@ -37,7 +37,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 	// ===== Message =====
 	messageRepo := repositories.NewMessageRepository(client, dbName)
 	messageService := services.NewMessageService(messageRepo, conversationRepo)
-	messageController := controllers.NewMessageController(messageService)
+	messageController := controllers.NewMessageController(messageService, cloudinaryURL)
 
 	// ===== Conversation Controller (needs messageService for last_message) =====
 	conversationController := controllers.NewConversationController(conversationService, messageService)

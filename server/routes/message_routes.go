@@ -19,4 +19,11 @@ func RegisterMessageRoutes(
 		msg.POST("", controller.SendMessage)
 		msg.GET("", controller.GetMessages)
 	}
+
+	// File upload — auth-protected
+	upload := r.Group("/upload")
+	upload.Use(middleware.AuthMiddleware(tokenService))
+	{
+		upload.POST("/attachment", controller.UploadAttachment)
+	}
 }
