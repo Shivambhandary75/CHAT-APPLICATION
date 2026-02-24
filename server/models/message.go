@@ -7,9 +7,11 @@ import (
 )
 
 type Message struct {
-    ID             bson.ObjectID `bson:"_id,omitempty" json:"id"`
-    ConversationID bson.ObjectID `bson:"conversation_id" json:"conversation_id"`
-    SenderID       string        `bson:"sender_id" json:"sender_id"`
-    Content        string        `bson:"content" json:"content"`
-    CreatedAt      time.Time     `bson:"created_at" json:"created_at"`
+	ID             bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	ConversationID bson.ObjectID `bson:"conversation_id" json:"conversation_id"`
+	SenderID       string        `bson:"sender_id" json:"sender_id"`
+	Content        string        `bson:"content" json:"content"`
+	AttachmentURL  string        `bson:"attachment_url,omitempty" json:"attachment_url,omitempty"`
+	AttachmentType string        `bson:"attachment_type,omitempty" json:"attachment_type,omitempty"`
+	CreatedAt      time.Time     `bson:"created_at" json:"created_at"`
 }

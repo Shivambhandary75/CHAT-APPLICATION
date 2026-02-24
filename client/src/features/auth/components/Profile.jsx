@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Camera, Save, User } from "lucide-react";
 import { updateProfile } from "../api/auth";
 
@@ -12,28 +12,51 @@ const Profile = ({ profileData, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  // File object for the new photo picked by user
+  const [photoFile, setPhotoFile] = useState(null);
+  // Local object URL for immediate preview
+  const [previewURL, setPreviewURL] = useState(null);
+  const prevPreviewRef = useRef(null);
 
   useEffect(() => {
     if (profileData) setEditedProfile({ name: "", username: "", photo: null, ...profileData });
   }, [profileData]);
 
+  // Revoke old object URLs to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (prevPreviewRef.current) URL.revokeObjectURL(prevPreviewRef.current);
+    };
+  }, []);
+
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditedProfile({ ...editedProfile, photo: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    // Revoke previous preview
+    if (previewURL) URL.revokeObjectURL(previewURL);
+    const url = URL.createObjectURL(file);
+    prevPreviewRef.current = url;
+    setPhotoFile(file);
+    setPreviewURL(url);
   };
+
+  // The image src to show: local preview > cloudinary URL > nothing
+  const displayPhoto = previewURL || editedProfile.photo || null;
 
   const handleSave = async () => {
     setIsSaving(true);
     setSaveError(null);
     try {
-      await updateProfile(editedProfile.name);
-      if (onSave) onSave(editedProfile);
+      const result = await updateProfile(editedProfile.name, photoFile || undefined);
+      const updatedPhoto = result?.photo_url || editedProfile.photo;
+      const updated = { ...editedProfile, photo: updatedPhoto };
+      setEditedProfile(updated);
+      // Clear local file state after successful upload
+      setPhotoFile(null);
+      if (previewURL) URL.revokeObjectURL(previewURL);
+      setPreviewURL(null);
+      prevPreviewRef.current = null;
+      if (onSave) onSave(updated);
       setIsEditing(false);
     } catch (err) {
       setSaveError(err.message || "Failed to save");
@@ -44,6 +67,10 @@ const Profile = ({ profileData, onSave }) => {
 
   const handleCancel = () => {
     setEditedProfile({ ...profileData });
+    setPhotoFile(null);
+    if (previewURL) URL.revokeObjectURL(previewURL);
+    setPreviewURL(null);
+    prevPreviewRef.current = null;
     setIsEditing(false);
     setSaveError(null);
   };
@@ -67,9 +94,9 @@ const Profile = ({ profileData, onSave }) => {
             {/* Profile Photo */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
-                {editedProfile.photo ? (
+                {displayPhoto ? (
                   <img
-                    src={editedProfile.photo}
+                    src={displayPhoto}
                     alt="Profile"
                     className="w-32 h-32 border-6 border-black rounded-full object-cover shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
                   />

@@ -28,6 +28,8 @@ func NewWSService(
 type IncomingMessage struct {
 	ConversationID string `json:"conversation_id"`
 	Content        string `json:"content"`
+	AttachmentURL  string `json:"attachment_url"`
+	AttachmentType string `json:"attachment_type"`
 }
 
 func (s *WSService) HandleMessage(senderID string, raw []byte) {
@@ -39,7 +41,7 @@ func (s *WSService) HandleMessage(senderID string, raw []byte) {
 	}
 
 	// Save to DB (with security check)
-	err = s.messageService.SendMessage(msg.ConversationID, senderID, msg.Content)
+	err = s.messageService.SendMessage(msg.ConversationID, senderID, msg.Content, msg.AttachmentURL, msg.AttachmentType)
 	if err != nil {
 		return
 	}
@@ -57,6 +59,8 @@ func (s *WSService) HandleMessage(senderID string, raw []byte) {
 			"conversation_id": msg.ConversationID,
 			"sender_id":       senderID,
 			"content":         msg.Content,
+			"attachment_url":  msg.AttachmentURL,
+			"attachment_type": msg.AttachmentType,
 			"created_at":      time.Now().UTC().Format(time.RFC3339),
 		}
 

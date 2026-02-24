@@ -16,7 +16,12 @@ export const getAvatarColor = (item, index = 0) =>
 
 const GroupSettings = ({ group, onSave, onClose }) => {
   const [groupName, setGroupName] = useState(group?.name || "");
-  const [groupPhoto, setGroupPhoto] = useState(group?.photo || null);
+  // Cloudinary URL from backend (existing persisted photo)
+  const [groupPhotoURL, setGroupPhotoURL] = useState(group?.photo || null);
+  // File picked by the user for a new upload
+  const [photoFile, setPhotoFile] = useState(null);
+  // Immediate local preview URL
+  const [previewURL, setPreviewURL] = useState(null);
   const [groupDescription, setGroupDescription] = useState(group?.description || "");
   const [avatarColor, setAvatarColor] = useState(group?.avatar_color || AVATAR_COLORS[0]);
 
@@ -57,12 +62,15 @@ const GroupSettings = ({ group, onSave, onClose }) => {
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setGroupPhoto(reader.result);
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    if (previewURL) URL.revokeObjectURL(previewURL);
+    const url = URL.createObjectURL(file);
+    setPhotoFile(file);
+    setPreviewURL(url);
   };
+
+  // What to show in the avatar area: local preview > cloudinary url > colour block
+  const displayPhoto = previewURL || groupPhotoURL || null;
 
   const addMember = (friend) => {
     if (!groupMembers.find((m) => m.id === friend.id)) {
@@ -86,10 +94,17 @@ const GroupSettings = ({ group, onSave, onClose }) => {
       const saved = await updateGroup(group.id, {
         name: groupName,
         description: groupDescription,
-        photo: groupPhoto || "",
+        photoFile: photoFile || undefined,
         avatarColor,
         memberIds,
       });
+      // Persist the returned Cloudinary URL so it shows immediately
+      if (saved?.photo) {
+        setGroupPhotoURL(saved.photo);
+        setPhotoFile(null);
+        if (previewURL) URL.revokeObjectURL(previewURL);
+        setPreviewURL(null);
+      }
       if (onSave) onSave({ ...saved, avatar_color: avatarColor });
       setAlertState({ isOpen: true, message: "GROUP SETTINGS SAVED!", type: "alert", onConfirm: null });
     } catch (err) {
@@ -127,8 +142,8 @@ const GroupSettings = ({ group, onSave, onClose }) => {
             {/* Group Photo */}
             <div className="flex flex-col items-center gap-4 bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
               <div className="relative">
-                {groupPhoto ? (
-                  <img src={groupPhoto} alt="Group" className="w-32 h-32 border-6 border-black rounded-full object-cover shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" />
+                {displayPhoto ? (
+                  <img src={displayPhoto} alt="Group" className="w-32 h-32 border-6 border-black rounded-full object-cover shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" />
                 ) : (
                   <div className={`w-32 h-32 ${avatarColor} border-6 border-black rounded-full flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]`}>
                     <Users size={60} />

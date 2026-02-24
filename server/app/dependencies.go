@@ -12,7 +12,7 @@ import (
 	"github.com/Shivambhandary75/CHAT-APPLICATION/server/ws"
 )
 
-func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
+func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudinaryURL string) {
 
 	// ===== Token =====
 	tokenRepo := repositories.NewTokenRepository(client, dbName)
@@ -21,7 +21,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 	// ===== Auth =====
 	authRepo := repositories.NewAuthRepository(client, dbName)
 	authService := services.NewAuthService(authRepo)
-	authController := controllers.NewAuthController(authService, tokenService)
+	authController := controllers.NewAuthController(authService, tokenService, cloudinaryURL)
 
 	routes.RegisterAuthRoutes(r, authController, tokenService)
 
@@ -37,7 +37,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 	// ===== Message =====
 	messageRepo := repositories.NewMessageRepository(client, dbName)
 	messageService := services.NewMessageService(messageRepo, conversationRepo)
-	messageController := controllers.NewMessageController(messageService)
+	messageController := controllers.NewMessageController(messageService, cloudinaryURL)
 
 	// ===== Conversation Controller (needs messageService for last_message) =====
 	conversationController := controllers.NewConversationController(conversationService, messageService)
@@ -48,7 +48,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string) {
 	// ===== Groups =====
 	groupRepo := repositories.NewGroupRepository(client, dbName)
 	groupService := services.NewGroupService(groupRepo, authRepo, conversationService)
-	groupController := controllers.NewGroupController(groupService)
+	groupController := controllers.NewGroupController(groupService, cloudinaryURL)
 
 	routes.RegisterGroupRoutes(r, groupController, tokenService)
 

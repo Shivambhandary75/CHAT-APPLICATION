@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [activeContact, setActiveContact] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
+  const [updatedGroup, setUpdatedGroup] = useState(null);
   const [profileData, setProfileData] = useState({
     name: "",
     username: "",
@@ -36,7 +37,7 @@ const Dashboard = () => {
         setProfileData({
           name: data.display_name || "",
           username: data.username || "",
-          photo: null,
+          photo: data.photo_url || null,  // Cloudinary URL persisted from last edit
         });
       })
       .catch((err) => console.error("Failed to load profile:", err));
@@ -82,7 +83,8 @@ const Dashboard = () => {
     setActiveView("chatList");
   };
 
-  const handleSaveGroup = (updatedGroup) => {
+  const handleSaveGroup = (savedGroup) => {
+    if (savedGroup) setUpdatedGroup(savedGroup);
     setShowGroupSettings(false);
   };
 
@@ -180,7 +182,7 @@ const Dashboard = () => {
           {activeView === "chat" && <ChatSection activeContact={activeContact} onBack={handleBackToChat} />}
           {activeView === "friends" && <Friends onSelectFriend={handleSelectContact} showAddSection={false} />}
           {activeView === "requests" && <Requests />}
-          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} onGroupSettings={handleGroupSettings} />}
+          {activeView === "groups" && <Groups onSelectGroup={handleSelectContact} onGroupSettings={handleGroupSettings} updatedGroup={updatedGroup} />}
           {activeView === "profile" && <Profile profileData={profileData} onSave={handleSaveProfile} />}
           {activeView === "addFriend" && <AddFriendForm />}
         </div>
