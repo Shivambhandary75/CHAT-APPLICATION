@@ -54,6 +54,23 @@ func (c *MessageController) GetMessages(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, messages)
 }
 
+func (c *MessageController) ClearChat(ctx *gin.Context) {
+
+	conversationID := ctx.Param("conversation_id")
+	userID := ctx.GetString("user_id")
+
+	if err := c.service.ClearMessages(conversationID, userID); err != nil {
+		if err.Error() == "unauthorized" {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "unauthorized"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to clear chat"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "chat cleared"})
+}
+
 // UploadAttachment accepts multipart/form-data with a "file" field,
 // uploads it to Cloudinary, and returns { url, type }.
 func (c *MessageController) UploadAttachment(ctx *gin.Context) {
