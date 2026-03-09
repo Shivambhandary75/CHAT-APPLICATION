@@ -39,14 +39,15 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudin
 	messageService := services.NewMessageService(messageRepo, conversationRepo)
 	messageController := controllers.NewMessageController(messageService, cloudinaryURL)
 
+	// ===== Groups =====
+	groupRepo := repositories.NewGroupRepository(client, dbName)
+
 	// ===== Conversation Controller (needs messageService for last_message) =====
-	conversationController := controllers.NewConversationController(conversationService, messageService)
+	conversationController := controllers.NewConversationController(conversationService, messageService, authRepo, groupRepo)
 
 	routes.RegisterConversationRoutes(r, conversationController, tokenService)
 	routes.RegisterMessageRoutes(r, messageController, tokenService)
 
-	// ===== Groups =====
-	groupRepo := repositories.NewGroupRepository(client, dbName)
 	groupService := services.NewGroupService(groupRepo, authRepo, conversationService)
 	groupController := controllers.NewGroupController(groupService, cloudinaryURL)
 
