@@ -43,6 +43,24 @@ const ChatSection = ({ onBack }) => {
 
   const currentUserId = localStorage.getItem("user_id");
 
+  // Resolve display info for the conversation header
+  const getConversationDisplayInfo = () => {
+    if (selectedConversation.type === "direct") {
+      const infos = selectedConversation.participant_infos || [];
+      const other = infos.find((p) => p.id !== currentUserId) || infos[0];
+      return {
+        name: other?.display_name || other?.username || selectedConversation.display_name || selectedConversation.username || "??",
+        photoUrl: other?.photo_url || null,
+      };
+    }
+    return {
+      name: selectedConversation.name || selectedConversation.display_name || "??",
+      photoUrl: selectedConversation.group_photo || null,
+    };
+  };
+
+  const { name: convName, photoUrl: convPhotoUrl } = getConversationDisplayInfo();
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (emojiRef.current && !emojiRef.current.contains(e.target)) {
@@ -201,21 +219,17 @@ const ChatSection = ({ onBack }) => {
             </button>
           )}
 
-          <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm">
-            {(selectedConversation.name ||
-              selectedConversation.display_name ||
-              selectedConversation.username ||
-              "??"
-            )
-              .substring(0, 2)
-              .toUpperCase()}
+          <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden">
+            {convPhotoUrl ? (
+              <img src={convPhotoUrl} alt={convName} className="w-full h-full object-cover" />
+            ) : (
+              convName.substring(0, 2).toUpperCase()
+            )}
           </div>
 
           <div>
             <h2 className="font-black text-xl uppercase">
-              {selectedConversation.name ||
-                selectedConversation.display_name ||
-                selectedConversation.username}
+              {convName}
             </h2>
           </div>
         </div>
@@ -262,13 +276,33 @@ const ChatSection = ({ onBack }) => {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {conversationMessages.map((msg, index) => {
           const isMe = msg.sender_id === currentUserId;
+          const participantInfos = selectedConversation.participant_infos || [];
+          const sender = participantInfos.find((p) => p.id === msg.sender_id);
+          const senderName = sender?.display_name || sender?.username || "";
+          const senderPhoto = sender?.photo_url || null;
+          const isGroup = selectedConversation.type === "group";
 
           return (
             <div
               key={index}
-              className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+              className={`flex ${isMe ? "justify-end" : "justify-start"} items-end gap-2`}
             >
+              {/* Avatar for other users */}
+              {!isMe && (
+                <div className="w-8 h-8 bg-[var(--color-crazy-blue)] border-2 border-black rounded-full flex items-center justify-center font-black text-xs overflow-hidden flex-shrink-0">
+                  {senderPhoto ? (
+                    <img src={senderPhoto} alt={senderName} className="w-full h-full object-cover" />
+                  ) : (
+                    (senderName || "?").substring(0, 2).toUpperCase()
+                  )}
+                </div>
+              )}
+
               <div className="max-w-[70%]">
+                {/* Sender name for group chats */}
+                {!isMe && isGroup && senderName && (
+                  <p className="text-xs font-black mb-1 ml-1 opacity-70 uppercase">{senderName}</p>
+                )}
                 <div
                   className={`${
                     isMe ? "bg-[var(--color-crazy-blue)]" : "bg-white"

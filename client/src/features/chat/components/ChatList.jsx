@@ -41,6 +41,16 @@ const ChatList = ({ onSelectChat }) => {
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
+  const currentUserId = localStorage.getItem("user_id");
+
+  // For a direct conversation, return the other participant's info.
+  // For group conversations, return null (use conv.name instead).
+  const getOtherParticipant = (conv) => {
+    if (conv.type !== "direct") return null;
+    const infos = conv.participant_infos || [];
+    return infos.find((p) => p.id !== currentUserId) || infos[0] || null;
+  };
+
   return (
     <div className="h-full bg-[var(--color-crazy-yellow)] flex flex-col">
       {/* Header */}
@@ -68,11 +78,15 @@ const ChatList = ({ onSelectChat }) => {
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {filteredConversations.map((conv, idx) => {
-          const conversationId = conv._id || conv.ID;
+          const conversationId = conv.id || conv._id || conv.ID;
+          const otherParticipant = getOtherParticipant(conv);
           const name =
-            conv.display_name ||
-            conv.name ||
-            conversationId;
+            conv.type === "direct"
+              ? (otherParticipant?.display_name || otherParticipant?.username || conv.display_name || conv.name || conversationId)
+              : (conv.name || conv.display_name || conversationId);
+          const photoUrl = conv.type === "direct"
+            ? (otherParticipant?.photo_url || null)
+            : (conv.group_photo || null);
 
           return (
             <button
@@ -83,8 +97,12 @@ const ChatList = ({ onSelectChat }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm">
-                      {name?.substring(0, 2).toUpperCase() || "??"}
+                    <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden">
+                      {photoUrl ? (
+                        <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
+                      ) : (
+                        name?.substring(0, 2).toUpperCase() || "??"
+                      )}
                     </div>
                   </div>
                   <div className="flex-1">

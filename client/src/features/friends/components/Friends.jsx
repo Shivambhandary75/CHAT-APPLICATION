@@ -246,12 +246,20 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
 									<div
 										className={`w-12 h-12 ${getAvatarColor(
 											index
-										)} border-4 border-black rounded-full flex items-center justify-center font-black text-sm`}
+										)} border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden`}
 									>
-										{(friend.display_name ||
-											friend.username)
-											.substring(0, 2)
-											.toUpperCase()}
+										{friend.photo_url ? (
+											<img
+												src={friend.photo_url}
+												alt={friend.display_name || friend.username}
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											(friend.display_name ||
+												friend.username)
+												.substring(0, 2)
+												.toUpperCase()
+										)}
 									</div>
 									<div>
 										<h3 className="font-black text-lg">

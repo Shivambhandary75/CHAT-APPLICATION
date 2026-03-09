@@ -38,5 +38,6 @@ type FriendResponse struct {
 	Username    string `json:"username"`
 	DisplayName string `json:"display_name"`
 	Email       string `json:"email"`
+	PhotoURL    string `json:"photo_url,omitempty"`
 	Status      string `json:"status"` // "online" or "offline"
 }

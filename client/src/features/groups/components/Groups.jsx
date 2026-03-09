@@ -377,6 +377,7 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings, upda
                         const conversation = await chatService.getOrCreateGroupConversation(group.id);
                         conversation.display_name = group.name;
                         conversation.name = group.name;
+                        conversation.group_photo = group.photo || null;
                         setSelectedConversation(conversation);
 
                         const conversationId = conversation.id;

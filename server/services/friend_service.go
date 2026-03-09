@@ -217,6 +217,7 @@ func (s *FriendService) GetFriends(userID bson.ObjectID) ([]models.FriendRespons
 			Username:    friend.Username,
 			DisplayName: friend.DisplayName,
 			Email:       friend.Email,
+			PhotoURL:    friend.PhotoURL,
 			Status:      "offline", // TODO: implement online status tracking
 		})
 	}
@@ -243,6 +244,7 @@ func (s *FriendService) SearchUsers(query string, currentUserID bson.ObjectID) (
 			Username:    user.Username,
 			DisplayName: user.DisplayName,
 			Email:       user.Email,
+			PhotoURL:    user.PhotoURL,
 			Status:      "offline",
 		})
 	}
