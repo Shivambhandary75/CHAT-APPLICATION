@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, ArrowLeft, Smile, Paperclip, X, FileText } from "lucide-react";
+import { Send, ArrowLeft, Smile, Paperclip, X, FileText, Trash2 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
 import { useChatStore } from "../store/ChatStore";
 import { socketClient } from "../../../core/socket/socketClient";
 import http from "../../../core/api/httpClient";
+import chatService from "../services/ChatService";
 
 const ChatSection = ({ onBack }) => {
   const selectedConversation = useChatStore(
@@ -34,6 +35,8 @@ const ChatSection = ({ onBack }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [pendingAttachment, setPendingAttachment] = useState(null); // { url, type, name }
   const [uploading, setUploading] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const messagesEndRef = useRef(null);
   const emojiRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -107,6 +110,20 @@ const ChatSection = ({ onBack }) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleClearChat = async () => {
+    setClearing(true);
+    try {
+      await chatService.clearChat(conversationId);
+      useChatStore.getState().clearMessages(conversationId);
+    } catch (err) {
+      console.error("Failed to clear chat:", err);
+      alert("Failed to clear chat. Please try again.");
+    } finally {
+      setClearing(false);
+      setShowClearConfirm(false);
     }
   };
 
@@ -202,7 +219,44 @@ const ChatSection = ({ onBack }) => {
             </h2>
           </div>
         </div>
+
+        {/* Clear Chat button */}
+        <button
+          onClick={() => setShowClearConfirm(true)}
+          title="Clear chat"
+          className="border-4 border-black bg-red-400 hover:bg-red-500 p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all"
+        >
+          <Trash2 size={20} />
+        </button>
       </div>
+
+      {/* Clear Chat Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-[var(--color-crazy-green)] border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-sm w-full mx-4">
+            <h3 className="font-black text-xl uppercase mb-2">Clear Chat?</h3>
+            <p className="font-bold text-sm mb-6">
+              All messages in this conversation will be permanently deleted for  you only and will still be visible to other the user. This cannot be undone!!!
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleClearChat}
+                disabled={clearing}
+                className="flex-1 bg-red-400 border-4 border-black py-2 font-black uppercase hover:bg-red-500 disabled:opacity-50 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all"
+              >
+                {clearing ? "Clearing..." : "Yes, Clear"}
+              </button>
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                disabled={clearing}
+                className="flex-1 bg-white border-4 border-black py-2 font-black uppercase hover:bg-gray-100 disabled:opacity-50 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MESSAGES */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">

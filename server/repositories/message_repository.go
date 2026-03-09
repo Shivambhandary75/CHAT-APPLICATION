@@ -67,3 +67,24 @@ func (r *MessageRepository) FindLatestByConversation(conversationID bson.ObjectI
 
 	return &message, nil
 }
+
+// FindByConversationAfter returns messages in the conversation created strictly after `after`.
+func (r *MessageRepository) FindByConversationAfter(conversationID bson.ObjectID, after time.Time) ([]models.Message, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := r.collection.Find(ctx, bson.M{
+		"conversation_id": conversationID,
+		"created_at":      bson.M{"$gt": after},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var messages []models.Message
+	if err := cursor.All(ctx, &messages); err != nil {
+		return nil, err
+	}
+
+	return messages, nil
+}

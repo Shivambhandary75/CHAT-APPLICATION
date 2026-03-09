@@ -69,6 +69,15 @@ func (s *MessageService) GetMessages(conversationID string, userID string) ([]mo
 		return nil, fmt.Errorf("unauthorized")
 	}
 
+	// If the user has cleared their chat, only return messages after that timestamp
+	clearedAt, err := s.conversationRepo.GetUserClearedAt(convID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if clearedAt != nil {
+		return s.repo.FindByConversationAfter(convID, *clearedAt)
+	}
+
 	return s.repo.FindByConversation(convID)
 }
 
@@ -78,4 +87,25 @@ func (s *MessageService) GetLatestMessage(conversationID string) (*models.Messag
 		return nil, err
 	}
 	return s.repo.FindLatestByConversation(convID)
+}
+
+func (s *MessageService) ClearMessages(conversationID string, userID string) error {
+	convID, err := bson.ObjectIDFromHex(conversationID)
+	if err != nil {
+		return err
+	}
+
+	// SECURITY CHECK – only participants can clear
+	allowed, err := s.conversationRepo.IsParticipant(convID, userID)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return fmt.Errorf("unauthorized")
+	}
+
+	// Record the current time as the user's clear point.
+	// Messages up to (and including) this moment become invisible for this user only.
+	// The other participant's view is completely unaffected.
+	return s.conversationRepo.SetUserClearedAt(convID, userID, time.Now())
 }

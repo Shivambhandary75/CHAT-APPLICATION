@@ -18,6 +18,7 @@ func RegisterMessageRoutes(
 	{
 		msg.POST("", controller.SendMessage)
 		msg.GET("", controller.GetMessages)
+		msg.DELETE("", controller.ClearChat)
 	}
 
 	// File upload — auth-protected

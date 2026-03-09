@@ -144,3 +144,36 @@ func (r *ConversationRepository) UpdateParticipants(conversationID bson.ObjectID
 	)
 	return err
 }
+
+// SetUserClearedAt records the time at which userID cleared the chat.
+// Messages with created_at <= this time will be hidden for that user only.
+func (r *ConversationRepository) SetUserClearedAt(conversationID bson.ObjectID, userID string, t time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := r.collection.UpdateOne(ctx,
+		bson.M{"_id": conversationID},
+		bson.M{"$set": bson.M{"cleared_at." + userID: t}},
+	)
+	return err
+}
+
+// GetUserClearedAt returns the cleared_at time for userID in the given conversation,
+// or nil if the user has never cleared.
+func (r *ConversationRepository) GetUserClearedAt(conversationID bson.ObjectID, userID string) (*time.Time, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var conv models.Conversation
+	err := r.collection.FindOne(ctx, bson.M{"_id": conversationID}).Decode(&conv)
+	if err != nil {
+		return nil, err
+	}
+
+	if conv.ClearedAt != nil {
+		if t, ok := conv.ClearedAt[userID]; ok {
+			return &t, nil
+		}
+	}
+	return nil, nil
+}
