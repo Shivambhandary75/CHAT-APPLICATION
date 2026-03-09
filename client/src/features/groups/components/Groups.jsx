@@ -255,10 +255,14 @@ const Groups = ({ onSelectGroup, showCreateSection = true, onGroupSettings, upda
                               className={`w-full flex items-center gap-2 px-3 py-2 font-bold text-sm text-left border-b border-gray-200 last:border-0 transition-colors ${isSelected ? "bg-[var(--color-crazy-green)]" : "hover:bg-gray-50"
                                 }`}
                             >
-                              <div className="w-6 h-6 bg-[var(--color-crazy-yellow)] border-2 border-black rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-xs font-black">
-                                  {(friend.display_name || friend.username)[0].toUpperCase()}
-                                </span>
+                              <div className="w-6 h-6 bg-[var(--color-crazy-yellow)] border-2 border-black rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                {friend.photo_url ? (
+                                  <img src={friend.photo_url} alt={friend.display_name || friend.username} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="text-xs font-black">
+                                    {(friend.display_name || friend.username)[0].toUpperCase()}
+                                  </span>
+                                )}
                               </div>
                               <span className="flex-1 uppercase text-xs">
                                 {friend.display_name || friend.username}

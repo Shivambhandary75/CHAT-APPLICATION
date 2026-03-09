@@ -158,6 +158,7 @@ func (s *FriendService) GetReceivedRequests(userID bson.ObjectID) ([]models.Frie
 			ReceiverID:  req.ReceiverID.Hex(),
 			Username:    sender.Username,
 			DisplayName: sender.DisplayName,
+			PhotoURL:    sender.PhotoURL,
 			Status:      req.Status,
 			CreatedAt:   req.CreatedAt,
 		})
@@ -186,6 +187,7 @@ func (s *FriendService) GetSentRequests(userID bson.ObjectID) ([]models.FriendRe
 			ReceiverID:  req.ReceiverID.Hex(),
 			Username:    receiver.Username,
 			DisplayName: receiver.DisplayName,
+			PhotoURL:    receiver.PhotoURL,
 			Status:      req.Status,
 			CreatedAt:   req.CreatedAt,
 		})
