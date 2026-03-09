@@ -167,8 +167,12 @@ const AddFriendForm = () => {
                           onClick={() => selectSuggestion(user.username)}
                           className="w-full p-3 border-b-3 border-black hover:bg-[var(--color-crazy-yellow)] active:bg-[var(--color-crazy-green)] active:scale-95 transition-all text-left flex items-center gap-3"
                         >
-                          <div className={`w-10 h-10 ${getAvatarColor(index)} border-3 border-black rounded-full flex items-center justify-center font-black text-xs`}>
-                            {user.display_name ? user.display_name.substring(0, 2).toUpperCase() : user.username.substring(0, 2).toUpperCase()}
+                          <div className={`w-10 h-10 ${getAvatarColor(index)} border-3 border-black rounded-full flex items-center justify-center font-black text-xs overflow-hidden`}>
+                            {user.photo_url ? (
+                              <img src={user.photo_url} alt={user.display_name || user.username} className="w-full h-full object-cover" />
+                            ) : (
+                              user.display_name ? user.display_name.substring(0, 2).toUpperCase() : user.username.substring(0, 2).toUpperCase()
+                            )}
                           </div>
                           <div>
                             <p className="font-black">{user.display_name || user.username}</p>

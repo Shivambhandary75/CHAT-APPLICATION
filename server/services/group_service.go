@@ -10,9 +10,9 @@ import (
 )
 
 type GroupService struct {
-	repo            *repositories.GroupRepository
-	authRepo        *repositories.AuthRepository
-	convService     *ConversationService
+	repo        *repositories.GroupRepository
+	authRepo    *repositories.AuthRepository
+	convService *ConversationService
 }
 
 func NewGroupService(repo *repositories.GroupRepository, authRepo *repositories.AuthRepository, convService *ConversationService) *GroupService {
@@ -114,6 +114,7 @@ func (s *GroupService) GetGroupMembers(groupID string) ([]models.FriendResponse,
 			Username:    u.Username,
 			DisplayName: u.DisplayName,
 			Email:       u.Email,
+			PhotoURL:    u.PhotoURL,
 		})
 	}
 	return result, nil

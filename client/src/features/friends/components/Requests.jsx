@@ -205,8 +205,12 @@ const Requests = () => {
                   <div className="flex items-center justify-between gap-4">
                     {/* User Info */}
                     <div className="flex items-center gap-4 flex-1">
-                      <div className={`w-16 h-16 ${getAvatarColor(index)} border-4 border-black rounded-full flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
-                        {(request.display_name || request.username).substring(0, 2).toUpperCase()}
+                      <div className={`w-16 h-16 ${getAvatarColor(index)} border-4 border-black rounded-full flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden`}>
+                        {request.photo_url ? (
+                          <img src={request.photo_url} alt={request.display_name || request.username} className="w-full h-full object-cover" />
+                        ) : (
+                          (request.display_name || request.username).substring(0, 2).toUpperCase()
+                        )}
                       </div>
                       <div>
                         <p className="font-black text-xl">{request.display_name || request.username}</p>
@@ -260,8 +264,12 @@ const Requests = () => {
                   <div className="flex items-center justify-between gap-4">
                     {/* User Info */}
                     <div className="flex items-center gap-4 flex-1">
-                      <div className={`w-16 h-16 ${getAvatarColor(index)} border-4 border-black rounded-full flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
-                        {(request.display_name || request.username).substring(0, 2).toUpperCase()}
+                      <div className={`w-16 h-16 ${getAvatarColor(index)} border-4 border-black rounded-full flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden`}>
+                        {request.photo_url ? (
+                          <img src={request.photo_url} alt={request.display_name || request.username} className="w-full h-full object-cover" />
+                        ) : (
+                          (request.display_name || request.username).substring(0, 2).toUpperCase()
+                        )}
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-xl">{request.display_name || request.username}</p>

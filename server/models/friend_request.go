@@ -29,6 +29,7 @@ type FriendRequestResponse struct {
 	ReceiverID  string    `json:"receiver_id"`
 	Username    string    `json:"username"`
 	DisplayName string    `json:"display_name"`
+	PhotoURL    string    `json:"photo_url,omitempty"`
 	Status      string    `json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 }

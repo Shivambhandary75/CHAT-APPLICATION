@@ -196,8 +196,12 @@ const GroupSettings = ({ group, onSave, onClose }) => {
                   groupMembers.map((member, idx) => (
                     <div key={member.id} className="bg-white border-3 border-black p-3 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]} border-3 border-black rounded-full flex items-center justify-center font-black text-xs`}>
-                          {initials(member)}
+                        <div className={`w-10 h-10 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]} border-3 border-black rounded-full flex items-center justify-center font-black text-xs overflow-hidden`}>
+                          {member.photo_url ? (
+                            <img src={member.photo_url} alt={displayName(member)} className="w-full h-full object-cover" />
+                          ) : (
+                            initials(member)
+                          )}
                         </div>
                         <div>
                           <p className="font-black">{displayName(member)}</p>
@@ -245,8 +249,12 @@ const GroupSettings = ({ group, onSave, onClose }) => {
                       className="w-full bg-white border-3 border-black p-3 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[var(--color-crazy-green)] transition-all text-left flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[var(--color-crazy-blue)] border-3 border-black rounded-full flex items-center justify-center font-black text-xs">
-                          {initials(friend)}
+                        <div className="w-10 h-10 bg-[var(--color-crazy-blue)] border-3 border-black rounded-full flex items-center justify-center font-black text-xs overflow-hidden">
+                          {friend.photo_url ? (
+                            <img src={friend.photo_url} alt={displayName(friend)} className="w-full h-full object-cover" />
+                          ) : (
+                            initials(friend)
+                          )}
                         </div>
                         <div>
                           <p className="font-black">{displayName(friend)}</p>
