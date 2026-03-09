@@ -51,11 +51,11 @@ func (s *ConversationService) GetUserConversations(userID string) ([]models.Conv
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if conversations == nil {
 		conversations = []models.Conversation{}
 	}
-	
+
 	return conversations, nil
 }
 
@@ -69,6 +69,10 @@ func (s *ConversationService) CreateGroupConversation(groupID string, name strin
 		return nil, err
 	}
 	if existing != nil {
+		// Always sync participants so newly-added members can access the chat.
+		if syncErr := s.repo.UpdateParticipants(existing.ID, members); syncErr == nil {
+			existing.Participants = members
+		}
 		return existing, nil
 	}
 

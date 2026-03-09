@@ -47,7 +47,11 @@ func (c *MessageController) GetMessages(ctx *gin.Context) {
 
 	messages, err := c.service.GetMessages(conversationID, userID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch messages"})
+		if err.Error() == "unauthorized" {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "not a participant in this conversation"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

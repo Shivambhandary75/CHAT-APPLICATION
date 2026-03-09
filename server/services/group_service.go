@@ -77,7 +77,18 @@ func (s *GroupService) UpdateGroup(groupID, name, description, photo, avatarColo
 	if memberIDs != nil {
 		update["members"] = memberIDs
 	}
-	return s.repo.Update(groupID, update)
+	group, err := s.repo.Update(groupID, update)
+	if err != nil {
+		return nil, err
+	}
+	// Sync conversation participants whenever group members change.
+	if memberIDs != nil {
+		conv, convErr := s.convService.GetOrCreateGroupConversation(groupID, group.Name, group.Members)
+		if convErr == nil && conv != nil {
+			s.convService.UpdateConversationParticipants(conv.ID.Hex(), group.Members)
+		}
+	}
+	return group, nil
 }
 
 func (s *GroupService) LeaveGroup(groupID, userID string) error {

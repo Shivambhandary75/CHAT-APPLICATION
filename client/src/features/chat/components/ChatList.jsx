@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { MessageCircle, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useChatStore } from "../store/ChatStore";
 import chatService from "../services/ChatService";
 
@@ -29,19 +29,47 @@ const ChatList = ({ onSelectChat }) => {
     if (onSelectChat) onSelectChat(conversation);
   };
 
-  const filteredConversations = conversations.filter((conv) => {
-    const name =
-      conv.name ||
-      conv.display_name ||
-      conv.ID ||
-      conv._id ||
-      conv.id ||
-      "";
-
-    return name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  const filteredConversations = conversations
+    .filter((conv) => {
+      const name =
+        conv.name ||
+        conv.display_name ||
+        conv.ID ||
+        conv._id ||
+        conv.id ||
+        "";
+      return name.toLowerCase().includes(searchQuery.toLowerCase());
+    })
+    .sort((a, b) => {
+      const timeA = a.last_message?.created_at
+        ? new Date(a.last_message.created_at).getTime()
+        : 0;
+      const timeB = b.last_message?.created_at
+        ? new Date(b.last_message.created_at).getTime()
+        : 0;
+      return timeB - timeA;
+    });
 
   const currentUserId = localStorage.getItem("user_id");
+
+  const formatTime = (isoString) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const isToday =
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday =
+      date.getFullYear() === yesterday.getFullYear() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getDate() === yesterday.getDate();
+    if (isToday)
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (isYesterday) return "Yesterday";
+    return date.toLocaleDateString([], { day: "2-digit", month: "2-digit", year: "2-digit" });
+  };
 
   // For a direct conversation, return the other participant's info.
   // For group conversations, return null (use conv.name instead).
@@ -95,8 +123,8 @@ const ChatList = ({ onSelectChat }) => {
               className="w-full bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all text-left"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="relative">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="relative flex-shrink-0">
                     <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden">
                       {photoUrl ? (
                         <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
@@ -105,8 +133,15 @@ const ChatList = ({ onSelectChat }) => {
                       )}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-black text-lg">{name}</h3>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="font-black text-lg truncate">{name}</h3>
+                      {conv.last_message?.created_at && (
+                        <span className="font-bold text-xs opacity-60 flex-shrink-0">
+                          {formatTime(conv.last_message.created_at)}
+                        </span>
+                      )}
+                    </div>
                     {conv.last_message ? (
                       <p className="font-bold text-xs mt-1 truncate opacity-70">
                         {conv.last_message.content}
@@ -118,7 +153,6 @@ const ChatList = ({ onSelectChat }) => {
                     )}
                   </div>
                 </div>
-                <MessageCircle size={20} />
               </div>
             </button>
           );

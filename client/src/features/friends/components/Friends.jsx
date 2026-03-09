@@ -55,10 +55,21 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
 				await chatService.createOrGetDirectConversation(
 					friend.id
 				);
+
+			// Inject friend info so ChatSection can show name & photo without
+			// needing a separate enriched API response.
+			conversation.participant_infos = [
+				{
+					id: friend.id,
+					username: friend.username,
+					display_name: friend.display_name,
+					photo_url: friend.photo_url || null,
+				},
+			];
+
 			setSelectedConversation(conversation);
 
 			const conversationId = conversation.id;
-			console.log(conversation)
 
 			const messages =
 				await chatService.fetchMessages(conversationId);
