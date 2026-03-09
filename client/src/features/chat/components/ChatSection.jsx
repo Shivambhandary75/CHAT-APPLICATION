@@ -28,6 +28,7 @@ const ChatSection = ({ onBack }) => {
     selectedConversation.id ||
     selectedConversation._id ||
     selectedConversation.ID;
+    console.log(selectedConversation)
 
   const conversationMessages = messages[conversationId] || [];
 
@@ -93,9 +94,12 @@ const ChatSection = ({ onBack }) => {
 
     // Optimistic render
     const addMessage = useChatStore.getState().addMessage;
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const currentUsername = currentUser.username || localStorage.getItem("username") || "";
     addMessage(conversationId, {
       conversation_id: conversationId,
       sender_id: currentUserId,
+      sender_username: currentUsername,
       content: inputValue,
       attachment_url: attachmentUrl,
       attachment_type: attachmentType,
@@ -262,6 +266,7 @@ const ChatSection = ({ onBack }) => {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {conversationMessages.map((msg, index) => {
           const isMe = msg.sender_id === currentUserId;
+          console.log(`Msg from ${msg.sender_id}:`, msg);
 
           return (
             <div
@@ -269,6 +274,11 @@ const ChatSection = ({ onBack }) => {
               className={`flex ${isMe ? "justify-end" : "justify-start"}`}
             >
               <div className="max-w-[70%]">
+                {!isMe && selectedConversation.type === "group" && (
+                  <span className="text-xs font-black text-gray-700 opacity-80 mb-1 block">
+                    {msg.sender_username || msg.sender_id}
+                  </span>
+                )}
                 <div
                   className={`${
                     isMe ? "bg-[var(--color-crazy-blue)]" : "bg-white"

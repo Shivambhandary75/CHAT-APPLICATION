@@ -83,6 +83,9 @@ export const loginUser = async (email, password) => {
     if (data.user_id) {
       localStorage.setItem("user_id", data.user_id);
     }
+    if (data.username) {
+      localStorage.setItem("username", data.username);
+    }
 
     return data;
   } catch (error) {

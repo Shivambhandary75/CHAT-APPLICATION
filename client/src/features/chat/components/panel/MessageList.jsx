@@ -22,7 +22,7 @@ export default function MessageList() {
       ) : (
         conversationMessages.map((msg, idx) => (
           <div key={idx} style={{ marginBottom: 8 }}>
-            <strong>{msg.sender_id}</strong>: {msg.content}
+            <strong>{msg.sender_username || msg.sender_id}</strong>: {msg.content}
           </div>
         ))
       )}
