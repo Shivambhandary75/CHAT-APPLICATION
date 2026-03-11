@@ -69,6 +69,11 @@ func (s *ConversationService) CreateGroupConversation(groupID string, name strin
 		return nil, err
 	}
 	if existing != nil {
+		// Sync participants with latest group members
+		if len(members) > 0 {
+			s.repo.UpdateParticipants(existing.ID, members)
+			existing.Participants = members
+		}
 		return existing, nil
 	}
 

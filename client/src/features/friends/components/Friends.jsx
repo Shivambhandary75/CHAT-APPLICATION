@@ -25,6 +25,7 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
 	);
 	const setMessages = useChatStore((s) => s.setMessages);
 	const setConversations = useChatStore((s) => s.setConversations);
+	const onlineUsers = useChatStore((s) => s.onlineUsers);
 
 	useEffect(() => {
 		loadFriends();
@@ -55,10 +56,14 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
 				await chatService.createOrGetDirectConversation(
 					friend.id
 				);
+            
+            conversation.display_name = friend.display_name || friend.username;
+            conversation.username = friend.username;
+            conversation.photo_url = friend.photo_url;
+
 			setSelectedConversation(conversation);
 
 			const conversationId = conversation.id;
-			console.log(conversation)
 
 			const messages =
 				await chatService.fetchMessages(conversationId);
@@ -243,18 +248,23 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
 						>
 							<div className="flex items-center justify-between">
 								<div className="flex items-center gap-3 flex-1">
-									<div
-										className={`w-12 h-12 ${getAvatarColor(
-											index
-										)} border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden`}
-									>
-										{friend.photo_url ? (
-											<img src={friend.photo_url} alt={friend.username} className="w-full h-full object-cover" />
-										) : (
-											(friend.display_name ||
-												friend.username)
-												.substring(0, 2)
-												.toUpperCase()
+									<div className="relative">
+										<div
+											className={`w-12 h-12 ${getAvatarColor(
+												index
+											)} border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden`}
+										>
+											{friend.photo_url ? (
+												<img src={friend.photo_url} alt={friend.username} className="w-full h-full object-cover" />
+											) : (
+												(friend.display_name ||
+													friend.username)
+													.substring(0, 2)
+													.toUpperCase()
+											)}
+										</div>
+										{onlineUsers[friend.id] && (
+										 <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
 										)}
 									</div>
 									<div>
@@ -302,8 +312,8 @@ const Friends = ({ onSelectFriend, showAddSection = true }) => {
 				</p>
 				<p className="font-bold text-sm mt-1">
 					{
-						filteredFriends.filter(
-							(f) => f.status === "online"
+						friends.filter(
+							(f) => onlineUsers[f.id]
 						).length
 					}{" "}
 					ONLINE

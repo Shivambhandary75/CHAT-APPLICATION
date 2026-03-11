@@ -49,7 +49,16 @@ func (c *ConversationController) CreateDirect(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, conversation)
+	// Enrich with the other user's details
+	enriched := ConversationEnriched{Conversation: *conversation}
+	otherUser, userErr := c.authRepo.FindByID(body.RecipientID)
+	if userErr == nil && otherUser != nil {
+		enriched.DisplayName = otherUser.DisplayName
+		enriched.Username = otherUser.Username
+		enriched.PhotoURL = otherUser.PhotoURL
+	}
+
+	ctx.JSON(http.StatusOK, enriched)
 }
 
 type ConversationEnriched struct {

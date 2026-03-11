@@ -13,11 +13,16 @@ const ChatList = ({ onSelectChat }) => {
     (s) => s.setSelectedConversation
   );
   const setMessages = useChatStore((s) => s.setMessages);
+  const markConversationRead = useChatStore((s) => s.markConversationRead);
+  const typingUsers = useChatStore((s) => s.typingUsers);
+  const onlineUsers = useChatStore((s) => s.onlineUsers);
+  const currentUserId = localStorage.getItem("user_id");
 
   const handleSelect = async (conversation) => {
     const conversationId = conversation.id || conversation._id || conversation.ID;
 
     setSelectedConversation(conversation);
+    markConversationRead(conversationId);
 
     try {
       const messages = await chatService.fetchMessages(conversationId);
@@ -94,11 +99,24 @@ const ChatList = ({ onSelectChat }) => {
                         name?.substring(0, 2).toUpperCase() || "??"
                       )}
                     </div>
+                    {/* User Online Indicator */}
+                    {conv.type !== "group" && (() => {
+                      const otherId = conv.participants?.find(p => p !== currentUserId);
+                      return otherId && onlineUsers[otherId];
+                    })() && (
+                        <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-black text-lg truncate max-w-[150px] sm:max-w-[200px]">{name}</h3>
-                    {conv.last_message ? (
-                      <p className="font-bold text-xs mt-1 truncate opacity-70">
+                    
+                    {/* Typing Indicator */}
+                    {Object.keys(typingUsers[conversationId] || {}).length > 0 ? (
+                      <p className="font-bold text-xs mt-1 text-green-600 animate-pulse">
+                        typing...
+                      </p>
+                    ) : conv.last_message ? (
+                      <p className={`font-bold text-xs mt-1 truncate ${conv.unread_count ? 'opacity-100 text-black' : 'opacity-70'}`}>
                         {conv.last_message.content}
                       </p>
                     ) : (
@@ -108,7 +126,14 @@ const ChatList = ({ onSelectChat }) => {
                     )}
                   </div>
                 </div>
-                <MessageCircle size={20} />
+                {/* Unread Message Badge */}
+                {conv.unread_count > 0 ? (
+                  <div className="bg-red-500 text-white font-black text-xs border-2 border-black rounded-full w-6 h-6 flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    {conv.unread_count}
+                  </div>
+                ) : (
+                  <MessageCircle size={20} className="opacity-50" />
+                )}
               </div>
             </button>
           );

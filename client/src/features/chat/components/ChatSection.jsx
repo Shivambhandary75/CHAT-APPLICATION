@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, ArrowLeft, Smile, Paperclip, X, FileText, Trash2, Copy, Check } from "lucide-react";
+import { Send, ArrowLeft, Smile, Paperclip, X, FileText, Trash2, Copy, Check, CheckCheck } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
 import { useChatStore } from "../store/ChatStore";
@@ -15,6 +15,8 @@ const ChatSection = ({ onBack }) => {
   );
 
   const messages = useChatStore((s) => s.messages);
+  const typingUsers = useChatStore((s) => s.typingUsers);
+  const onlineUsers = useChatStore((s) => s.onlineUsers);
 
   if (!selectedConversation) {
     return (
@@ -58,6 +60,20 @@ const ChatSection = ({ onBack }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversationMessages]);
 
+  // Send read receipt only once when the conversation is opened
+  useEffect(() => {
+    if (conversationId) {
+      useChatStore.getState().markConversationRead(conversationId);
+      socketClient.send({
+        type: "read",
+        conversation_id: conversationId,
+      });
+    }
+  }, [conversationId]);
+
+  // Determine the other user's ID for online status
+  const otherUserId = selectedConversation.participants?.find(p => p !== currentUserId) || null;
+
   // Upload file → server → Cloudinary
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -86,6 +102,7 @@ const ChatSection = ({ onBack }) => {
     const attachmentType = pendingAttachment?.type || "";
 
     socketClient.send({
+      type: "chat_message",
       conversation_id: conversationId,
       content: inputValue,
       attachment_url: attachmentUrl,
@@ -111,6 +128,20 @@ const ChatSection = ({ onBack }) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const typingTimeoutRef = useRef(null);
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+    if (!typingTimeoutRef.current) {
+        socketClient.send({
+            type: "typing",
+            conversation_id: conversationId,
+        });
+        typingTimeoutRef.current = setTimeout(() => {
+            typingTimeoutRef.current = null;
+        }, 1000);
     }
   };
 
@@ -228,15 +259,19 @@ const ChatSection = ({ onBack }) => {
           </div>
 
           <div>
-            <h2 className="font-black text-xl uppercase leading-tight">
+            <h2 className="font-black text-xl uppercase leading-tight flex items-center">
               {selectedConversation.name ||
                 selectedConversation.display_name ||
                 selectedConversation.username ||
                 "Unknown"}
+              {selectedConversation.type !== "group" && otherUserId && onlineUsers[otherUserId] && (
+                <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-black ml-2 animate-pulse" title="Online"></div>
+              )}
             </h2>
             {selectedConversation.username && selectedConversation.type !== "group" && (
               <p className="font-bold text-xs opacity-80 uppercase">
-                @{selectedConversation.username}
+                @{selectedConversation.username} 
+                {otherUserId && onlineUsers[otherUserId] ? " • Online" : ""}
               </p>
             )}
             {selectedConversation.type === "group" && selectedConversation.members && (
@@ -327,10 +362,15 @@ const ChatSection = ({ onBack }) => {
 
                       {renderAttachment(msg)}
 
-                      <div className="flex justify-end mt-1">
+                    <div className="flex justify-end items-center gap-1 mt-1">
                         <span className="text-[10px] font-bold opacity-70 whitespace-nowrap">
                           {formatTime(msg.created_at)}
                         </span>
+                        {isMe && (
+                          <span className="opacity-70">
+                            {msg.is_read ? <CheckCheck size={12} className="text-blue-500" /> : <Check size={12} />}
+                          </span>
+                        )}
                       </div>
                     </div>
                     
@@ -352,6 +392,20 @@ const ChatSection = ({ onBack }) => {
         })}
 
         <div ref={messagesEndRef} />
+        
+        {/* Chat Typing Indicator Area */}
+        {Object.keys(typingUsers[conversationId] || {}).length > 0 && (
+            <div className="flex items-center gap-2 mt-4 ml-4">
+                <div className="w-8 h-8 rounded-full border-2 border-black bg-white flex items-center justify-center">
+                    <span className="text-[10px] font-black">??</span>
+                </div>
+                <div className="bg-white border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-br-xl rounded-tr-xl rounded-tl-xl flex gap-1 items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-black rounded-full animate-bounce"></div>
+                    <div className="w-1.5 h-1.5 bg-black rounded-full animate-bounce" style={{animationDelay: "0.2s"}}></div>
+                    <div className="w-1.5 h-1.5 bg-black rounded-full animate-bounce" style={{animationDelay: "0.4s"}}></div>
+                </div>
+            </div>
+        )}
       </div>
 
       {/* INPUT BAR */}
@@ -437,7 +491,7 @@ const ChatSection = ({ onBack }) => {
           <input
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyPress}
             placeholder="Type something ..."
             className="flex-1 border-4 border-black px-4 py-3 font-bold bg-white"

@@ -37,9 +37,46 @@ export const useChatInit = () => {
 
         // Handler for incoming WebSocket messages
         const handler = (data) => {
-            // Skip messages sent by the current user (already rendered optimistically)
-            if (data.sender_id === currentUserId) return;
-            addMessage(data.conversation_id, data);
+            const selectedConv = useChatStore.getState().selectedConversation;
+            const isSelected = selectedConv && (selectedConv.id === data.conversation_id || selectedConv._id === data.conversation_id || selectedConv.ID === data.conversation_id);
+
+            switch (data.type) {
+                case "online_status":
+                    useChatStore.getState().setOnlineUser(data.user_id, data.is_online);
+                    break;
+                case "typing":
+                    if (data.sender_id !== currentUserId) {
+                        useChatStore.getState().setTypingUser(data.conversation_id, data.sender_id, true);
+                        // Auto clear typing after 3 seconds
+                        setTimeout(() => {
+                           useChatStore.getState().setTypingUser(data.conversation_id, data.sender_id, false);
+                        }, 3000);
+                    }
+                    break;
+                case "read":
+                    if (isSelected) {
+                        useChatStore.getState().markMessageRead(data.conversation_id, null);
+                    }
+                    break;
+                case "chat_message":
+                default:
+                    if (data.sender_id !== currentUserId) {
+                        useChatStore.getState().addMessage(data.conversation_id, data);
+                        useChatStore.getState().updateConversationLastMessage(data.conversation_id, data, !isSelected);
+                        
+                        // If it is selected, send a read receipt back!
+                        if (isSelected) {
+                            socketClient.send({
+                                type: "read",
+                                conversation_id: data.conversation_id
+                            });
+                        }
+                    } else {
+                        // We generated it optimistically maybe, but let's update conversation list anyway
+                        useChatStore.getState().updateConversationLastMessage(data.conversation_id, data, false);
+                    }
+                    break;
+            }
         };
 
         socketClient.on("message", handler);
