@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, ArrowLeft, Smile, Paperclip, X, FileText, Trash2 } from "lucide-react";
+import { Send, ArrowLeft, Smile, Paperclip, X, FileText, Trash2, Copy, Check } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
 import { useChatStore } from "../store/ChatStore";
@@ -28,7 +28,6 @@ const ChatSection = ({ onBack }) => {
     selectedConversation.id ||
     selectedConversation._id ||
     selectedConversation.ID;
-    console.log(selectedConversation)
 
   const conversationMessages = messages[conversationId] || [];
 
@@ -38,6 +37,7 @@ const ChatSection = ({ onBack }) => {
   const [uploading, setUploading] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
   const messagesEndRef = useRef(null);
   const emojiRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -94,12 +94,9 @@ const ChatSection = ({ onBack }) => {
 
     // Optimistic render
     const addMessage = useChatStore.getState().addMessage;
-    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-    const currentUsername = currentUser.username || localStorage.getItem("username") || "";
     addMessage(conversationId, {
       conversation_id: conversationId,
       sender_id: currentUserId,
-      sender_username: currentUsername,
       content: inputValue,
       attachment_url: attachmentUrl,
       attachment_type: attachmentType,
@@ -115,6 +112,13 @@ const ChatSection = ({ onBack }) => {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleCopy = (text, id) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleClearChat = async () => {
@@ -205,22 +209,41 @@ const ChatSection = ({ onBack }) => {
             </button>
           )}
 
-          <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm">
-            {(selectedConversation.name ||
-              selectedConversation.display_name ||
-              selectedConversation.username ||
-              "??"
-            )
-              .substring(0, 2)
-              .toUpperCase()}
+          <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden">
+            {(selectedConversation.photo_url || selectedConversation.profile_image || selectedConversation.avatar_url) ? (
+              <img
+                src={selectedConversation.photo_url || selectedConversation.profile_image || selectedConversation.avatar_url}
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              (selectedConversation.name ||
+                selectedConversation.display_name ||
+                selectedConversation.username ||
+                "??"
+              )
+                .substring(0, 2)
+                .toUpperCase()
+            )}
           </div>
 
           <div>
-            <h2 className="font-black text-xl uppercase">
+            <h2 className="font-black text-xl uppercase leading-tight">
               {selectedConversation.name ||
                 selectedConversation.display_name ||
-                selectedConversation.username}
+                selectedConversation.username ||
+                "Unknown"}
             </h2>
+            {selectedConversation.username && selectedConversation.type !== "group" && (
+              <p className="font-bold text-xs opacity-80 uppercase">
+                @{selectedConversation.username}
+              </p>
+            )}
+            {selectedConversation.type === "group" && selectedConversation.members && (
+              <p className="font-bold text-xs opacity-80 uppercase">
+                {selectedConversation.members.length} MEMBERS
+              </p>
+            )}
           </div>
         </div>
 
@@ -266,34 +289,61 @@ const ChatSection = ({ onBack }) => {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {conversationMessages.map((msg, index) => {
           const isMe = msg.sender_id === currentUserId;
-          console.log(`Msg from ${msg.sender_id}:`, msg);
 
           return (
             <div
               key={index}
               className={`flex ${isMe ? "justify-end" : "justify-start"}`}
             >
-              <div className="max-w-[70%]">
-                {!isMe && selectedConversation.type === "group" && (
-                  <span className="text-xs font-black text-gray-700 opacity-80 mb-1 block">
-                    {msg.sender_username || msg.sender_id}
-                  </span>
+              <div className={`flex gap-2 max-w-[80%] ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                {!isMe && msg.sender && (
+                  <div className="w-8 h-8 rounded-full border-2 border-black flex-shrink-0 overflow-hidden bg-[var(--color-crazy-pink)] flex items-center justify-center mt-4">
+                    {msg.sender.photo_url ? (
+                      <img src={msg.sender.photo_url} className="w-full h-full object-cover" alt="Avatar" />
+                    ) : (
+                      <span className="text-[10px] font-black">
+                        {(msg.sender.display_name || msg.sender.username || "?").substring(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                 )}
-                <div
-                  className={`${
-                    isMe ? "bg-[var(--color-crazy-blue)]" : "bg-white"
-                  } border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
-                >
-                  {msg.content && (
-                    <p className="font-bold break-words">{msg.content}</p>
-                  )}
-
-                  {renderAttachment(msg)}
-
-                  <div className="flex justify-end mt-2">
-                    <span className="text-xs font-bold opacity-70">
-                      {formatTime(msg.created_at)}
+                
+                <div className="flex flex-col max-w-full group/msg">
+                  {!isMe && msg.sender && (
+                    <span className="text-[10px] font-black uppercase mb-1 opacity-70 ml-1">
+                      {msg.sender.display_name || msg.sender.username}
                     </span>
+                  )}
+                  <div className={`flex ${isMe ? "flex-row-reverse" : "flex-row"} items-center gap-2`}>
+                    <div
+                      className={`${
+                        isMe ? "bg-[var(--color-crazy-blue)] rounded-bl-xl rounded-tl-xl rounded-tr-xl" : "bg-white rounded-br-xl rounded-tr-xl rounded-tl-xl"
+                      } border-4 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] break-words transition-transform hover:-translate-y-0.5 hover:-translate-x-0.5`}
+                      style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                    >
+                      {msg.content && (
+                        <p className="font-bold">{msg.content}</p>
+                      )}
+
+                      {renderAttachment(msg)}
+
+                      <div className="flex justify-end mt-1">
+                        <span className="text-[10px] font-bold opacity-70 whitespace-nowrap">
+                          {formatTime(msg.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Copy Button */}
+                    {msg.content && (
+                      <button 
+                        onClick={() => handleCopy(msg.content, index)}
+                        className="opacity-0 group-hover/msg:opacity-100 transition-opacity p-2 hover:bg-[var(--color-crazy-yellow)] bg-white rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
+                        title="Copy message"
+                      >
+                        {copiedId === index ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

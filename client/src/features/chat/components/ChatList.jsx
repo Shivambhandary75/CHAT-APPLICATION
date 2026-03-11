@@ -83,12 +83,20 @@ const ChatList = ({ onSelectChat }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm">
-                      {name?.substring(0, 2).toUpperCase() || "??"}
+                    <div className="w-12 h-12 bg-[var(--color-crazy-blue)] border-4 border-black rounded-full flex items-center justify-center font-black text-sm overflow-hidden">
+                      {(conv.photo_url || conv.profile_image || conv.avatar_url) ? (
+                        <img 
+                          src={conv.photo_url || conv.profile_image || conv.avatar_url} 
+                          alt="chat thumbnail" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        name?.substring(0, 2).toUpperCase() || "??"
+                      )}
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-black text-lg">{name}</h3>
+                    <h3 className="font-black text-lg truncate max-w-[150px] sm:max-w-[200px]">{name}</h3>
                     {conv.last_message ? (
                       <p className="font-bold text-xs mt-1 truncate opacity-70">
                         {conv.last_message.content}

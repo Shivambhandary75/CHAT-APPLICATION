@@ -34,19 +34,21 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudin
 	conversationRepo := repositories.NewConversationRepository(client, dbName)
 	conversationService := services.NewConversationService(conversationRepo)
 
+	// ===== Groups =====
+	groupRepo := repositories.NewGroupRepository(client, dbName)
+
 	// ===== Message =====
 	messageRepo := repositories.NewMessageRepository(client, dbName)
-	messageService := services.NewMessageService(messageRepo, conversationRepo)
+	messageService := services.NewMessageService(messageRepo, conversationRepo, authRepo)
 	messageController := controllers.NewMessageController(messageService, cloudinaryURL)
 
 	// ===== Conversation Controller (needs messageService for last_message) =====
-	conversationController := controllers.NewConversationController(conversationService, messageService)
+	conversationController := controllers.NewConversationController(conversationService, messageService, authRepo, groupRepo)
 
 	routes.RegisterConversationRoutes(r, conversationController, tokenService)
 	routes.RegisterMessageRoutes(r, messageController, tokenService)
 
 	// ===== Groups =====
-	groupRepo := repositories.NewGroupRepository(client, dbName)
 	groupService := services.NewGroupService(groupRepo, authRepo, conversationService)
 	groupController := controllers.NewGroupController(groupService, cloudinaryURL)
 
@@ -63,7 +65,7 @@ func RegisterModules(r *gin.Engine, client *mongo.Client, dbName string, cloudin
 	hub := ws.NewHub()
 	go hub.Run()
 
-	wsService := services.NewWSService(hub, messageService, conversationService)
+	wsService := services.NewWSService(hub, messageService, conversationService, authRepo)
 	wsController := controllers.NewWSController(hub, wsService)
 
 	routes.RegisterWSRoutes(r, wsController, tokenService)
