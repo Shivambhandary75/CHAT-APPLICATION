@@ -2,9 +2,7 @@
 
 A modern real-time chat platform that connects users with one-to-one and group messaging, secure authentication, and live WebSocket communication.
 
-**Developed by Team Fantastic Four**
 
----
 
 ##  Tech Stack
 
@@ -97,12 +95,12 @@ VITE_API_URL=http://localhost:8080
 
 ---
 
-##  Features
+## Features
 
--  User authentication (signup/login/logout)
+- User authentication (signup/login/logout)
 -  Profile management with avatar upload
--  One-to-one real-time messaging
--  Group chat creation and management
+- One-to-one real-time messaging
+- Group chat creation and management
 -  Friend request system (send/accept/reject/cancel/remove)
 -  WebSocket live message delivery
 -  Conversation and message history
