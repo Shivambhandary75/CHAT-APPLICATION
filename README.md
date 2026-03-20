@@ -6,7 +6,7 @@ A modern real-time chat platform that connects users with one-to-one and group m
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 
