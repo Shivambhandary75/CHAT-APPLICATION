@@ -1,4 +1,4 @@
-# 💬 CHAT-APPLICATION
+#  CHAT-APPLICATION
 
 A modern real-time chat platform that connects users with one-to-one and group messaging, secure authentication, and live WebSocket communication.
 
@@ -35,7 +35,7 @@ A modern real-time chat platform that connects users with one-to-one and group m
 
 ---
 
-## 📦 Installation
+##  Installation
 
 ### Prerequisites
 
@@ -97,21 +97,21 @@ VITE_API_URL=http://localhost:8080
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🔐 User authentication (signup/login/logout)
-- 👤 Profile management with avatar upload
-- 💬 One-to-one real-time messaging
-- 👥 Group chat creation and management
-- 🧑‍🤝‍🧑 Friend request system (send/accept/reject/cancel/remove)
-- ⚡ WebSocket live message delivery
-- 📂 Conversation and message history
-- 📊 Live stats stream support
-- 🛡️ Protected routes with JWT and token revocation
+-  User authentication (signup/login/logout)
+-  Profile management with avatar upload
+-  One-to-one real-time messaging
+-  Group chat creation and management
+-  Friend request system (send/accept/reject/cancel/remove)
+-  WebSocket live message delivery
+-  Conversation and message history
+-  Live stats stream support
+-  Protected routes with JWT and token revocation
 
 ---
 
-## 🚀 Usage
+##  Usage
 
 1. **Sign Up** - Create a new account
 2. **Login** - Authenticate and enter dashboard/chat
